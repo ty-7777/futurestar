@@ -1,0 +1,79 @@
+# =====================================================================
+# 智星足球青训综合管理系统 - 应用配置
+# 说明：带 ${...:默认值} 的可根据本地环境手动修改
+# =====================================================================
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: futurestar
+
+  # ---------------- 数据库（MySQL，本地可用 8.4/9.x） ----------------
+  datasource:
+    url: jdbc:mysql://192.168.110.144/futurestar?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 16
+      minimum-idle: 4
+
+  # ---------------- Redis ----------------
+  data:
+    redis:
+      host: 192.168.110.144
+      port: 6379
+      database: 0
+      timeout: 5000ms
+
+  # ---------------- Spring AI + DeepSeek（OpenAI 兼容接口） ----------------
+  # 说明：AI 功能尚未实现，临时关闭 OpenAI 自动装配，避免因缺少 api-key 启动失败。
+  #       待实现 AI 对话时：把 model.chat.enabled 改为 true，并填入真实的 DEEPSEEK_API_KEY。
+  ai:
+    openai:
+      api-key: ${DEEPSEEK_API_KEY:}
+      base-url: https://api.deepseek.com
+    model:
+      chat:
+        enabled: false
+      embedding:
+        enabled: false
+      image:
+        enabled: false
+      audio:
+        speech:
+          enabled: false
+        transcription:
+          enabled: false
+      moderation:
+        enabled: false
+
+# ---------------- MyBatis ----------------
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.situ.futurestar.core.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# ---------------- PageHelper 分页 ----------------
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
+
+# ---------------- JWT ----------------
+jwt:
+  secret: ${JWT_SECRET:futurestar-jwt-secret-please-change-this-in-production-2026}
+  access-token-expire: 7200        # Access Token 有效期（秒），2 小时
+  refresh-token-expire: 604800     # Refresh Token 有效期（秒），7 天
+
+# ---------------- 阿里云短信 ----------------
+
+    # 验证码模板 Code（在阿里云短信控制台申请后填入）
+
+# ---------------- 文件上传路径 ----------------
+

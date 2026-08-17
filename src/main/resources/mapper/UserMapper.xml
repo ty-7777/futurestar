@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.situ.futurestar.core.mapper.UserMapper">
+    <select id="selectByPhone" resultType="com.situ.futurestar.core.entity.User">
+        SELECT * FROM user
+        WHERE phone = #{phone} AND deleted = 0
+    </select>
+    <insert id="insert" parameterType="com.situ.futurestar.core.entity.User"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (phone, password, real_name, role, member_level, points, status)
+        VALUES (#{phone}, #{password}, #{realName}, #{role}, #{memberLevel}, #{points}, #{status})
+    </insert>
+    <select id="selectById" resultType="com.situ.futurestar.core.entity.User">
+        SELECT * FROM user
+        WHERE id = #{id} AND deleted = 0
+    </select>
+    <update id="updatePassword">
+        update user SET password = #{password}
+        WHERE id = #{userId}
+    </update>
+</mapper>

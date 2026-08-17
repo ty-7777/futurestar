@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.situ.futurestar.core.mapper.PhysicalRecordMapper">
+     <insert id="insert" parameterType="com.situ.futurestar.core.entity.PhysicalRecord"
+     useGeneratedKeys="true" keyProperty="id">
+         INSERT INTO physical_record (
+             user_id, height, weight, bmi, body_fat_rate, heart_rate,
+             vital_capacity, sprint_30m, standing_long_jump, vertical_jump,
+             endurance_run, memo, recorded_at
+         ) VALUES (
+                      #{userId}, #{height}, #{weight}, #{bmi}, #{bodyFatRate}, #{heartRate},
+                      #{vitalCapacity}, #{sprint30m}, #{standingLongJump}, #{verticalJump},
+                      #{enduranceRun}, #{memo}, #{recordedAt}
+                  )
+     </insert>
+    <select id="selectListByUserId"  resultType="com.situ.futurestar.core.entity.PhysicalRecord">
+        SELECT * FROM physical_record
+        WHERE user_id = #{userId} AND deleted = 0
+        ORDER BY  recorded_at DESC
+    </select>
+    <select id="trend"  resultType="com.situ.futurestar.core.entity.PhysicalRecord" >
+        SELECT * FROM  physical_record
+        WHERE user_id = #{userId}
+          AND deleted = 0
+          AND recorded_at &gt;= DATE_SUB(NOW(),INTERVAL #{months} MONTH)
+        ORDER BY recorded_at ASC
+    </select>
+</mapper>
