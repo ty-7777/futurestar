@@ -30,9 +30,9 @@ public class PhysicalServiceImpl implements PhysicalService {
         PhysicalRecord record=new PhysicalRecord();
         BeanUtils.copyProperties(physicalRecordDTO,record);
         if (record.getHeight() != null && record.getWeight() != null) {//这里注意要判空
-            record.setBmi(record.getWeight() / (record.getHeight() * record.getHeight()));
+            double heightM = record.getHeight() / 100;
+            record.setBmi(record.getWeight() / (heightM * heightM));
         }//设置bmi
-
         Long userId = SecurityUtil.getCurrentUserId();
         record.setUserId(userId);//设置用户Id
         record.setRecordedAt(physicalRecordDTO.getRecordedAt() != null//设置体测时间，如果前端没有穿的话

@@ -32,6 +32,8 @@ public class CourseAppointmentVO {
     /** 课程日期 */
     private LocalDate courseDate;
 
+    private Integer price;
+
     /** 时间段 */
     private String timeRange;
 

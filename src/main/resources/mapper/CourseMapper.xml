@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.situ.futurestar.core.mapper.CourseMapper">
+    <select id="list" resultType="com.situ.futurestar.core.entity.CoursePackage">
+        SELECT * FROM course_package
+        WHERE status = 'ENABLED'
+        AND deleted = 0
+    </select>
+    <select id="getPackageById" resultType="com.situ.futurestar.core.entity.CoursePackage">
+        SELECT * FROM course_package
+        WHERE  id = #{id}
+          AND status = 'ENABLED'
+          AND deleted = 0
+    </select>
+    <select id="getSlots" resultType="com.situ.futurestar.core.entity.CourseSlot">
+         SELECT * FROM course_slot
+         WHERE package_id = #{id}
+         AND  course_date = #{date}
+         AND  status = 'AVAILABLE'
+         AND  deleted = 0
+    </select>
+    <select id="selectBySlotId" resultType="com.situ.futurestar.core.entity.CourseSlot">
+        SELECT * FROM course_slot
+        WHERE  id = #{id}
+        AND  deleted = 0
+    </select>
+    <select id="selectMyAppointment" resultType="com.situ.futurestar.core.vo.CourseAppointmentVO">
+        SELECT
+            a.id, a.user_id, a.package_id, a.slot_id, a.status, a.report_url, a.create_time,
+            p.name AS package_name, p.coach_name,
+            s.course_date, s.time_range
+        FROM course_appointment a
+                 LEFT JOIN course_package p ON p.id = a.package_id
+                 LEFT JOIN course_slot     s ON s.id = a.slot_id
+        WHERE a.user_id = #{userId}
+          AND a.status = #{status}
+          AND a.deleted = 0
+    </select>
+    <update id="plusCurrentCount">
+        UPDATE course_slot
+        SET current_count = current_count + 1
+        WHERE id = #{id}
+        AND  current_count &lt; max_count
+        AND  status = 'AVAILABLE'
+        AND  deleted = 0
+    </update>
+    <insert id="createAppointment">
+        INSERT INTO course_appointment
+        ( user_id, slot_id, package_id)
+        VALUES (#{userId}, #{slotId}, #{packageId})
+    </insert>
+    <select id="selectByAppointmentId" resultType="com.situ.futurestar.core.vo.CourseAppointmentVO">
+        SELECT
+            a.id, a.user_id, a.package_id, a.slot_id, a.status, a.report_url, a.create_time,
+            p.name AS package_name, p.coach_name, p.price,
+            s.course_date, s.time_range
+        FROM course_appointment a
+                 LEFT JOIN course_package p ON p.id = a.package_id
+                 LEFT JOIN course_slot     s ON s.id = a.slot_id
+        WHERE a.id = #{id}
+          AND a.deleted = 0
+    </select>
+    <update id="updateAppointmentStatus">
+        UPDATE course_appointment
+        SET status = 'CANCELED'
+        WHERE id = #{id}
+        AND deleted = 0
+    </update>
+    <update id="decreaseCurrentCount">
+        UPDATE course_appointment a
+            LEFT JOIN course_slot s ON s.id = a.slot_id
+            SET s.current_count = s.current_count - 1
+        WHERE a.id = #{id} AND s.current_count &gt; 0
+    </update>
+</mapper>

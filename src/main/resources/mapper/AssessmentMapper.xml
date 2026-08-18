@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.situ.futurestar.core.mapper.AssessmentMapper">
+     <select id="getList" resultType="com.situ.futurestar.core.entity.Questionnaire">
+         SELECT * FROM questionnaire
+         WHERE deleted = 0
+         AND status = 'PUBLISHED'
+     </select>
+    <select id="getQuestions" resultType="com.situ.futurestar.core.entity.Question">
+        SELECT * FROM question
+        WHERE questionnaire_id = #{id}
+        AND deleted = 0
+        ORDER BY sort_order
+    </select>
+    <insert id="saveAssessment" parameterType="com.situ.futurestar.core.entity.AssessmentResult"
+    useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO assessment_result
+            (user_id, questionnaire_id, answers, ai_score, ai_suggestion)
+        VALUES (#{userId}, #{questionnaireId}, #{answers}, #{aiScore}, #{aiSuggestion})
+    </insert>
+    <select id="selectByUserId" resultType="com.situ.futurestar.core.entity.AssessmentResult">
+        SELECT *
+        FROM assessment_result
+        WHERE user_id = #{userId}
+        AND deleted = 0
+    </select>
+    <select id="selectById" resultType="com.situ.futurestar.core.entity.AssessmentResult">
+        SELECT *
+        FROM assessment_result
+        WHERE id = #{id}
+        AND deleted = 0
+    </select>
+</mapper>

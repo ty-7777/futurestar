@@ -12,4 +12,7 @@ public interface UserMapper {
     User selectById(Long id);
     int insert (User user);
     void updatePassword(@Param("userId") Long userId, @Param("password") String password);
+
+    void updatePoints(@Param("userId") Long userId,@Param("points") int points);
+    void decreasePoints(@Param("userId") Long userId,@Param("points") int points);
 }

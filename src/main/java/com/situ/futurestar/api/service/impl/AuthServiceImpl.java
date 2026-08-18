@@ -43,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
         if(phone == null|| phone.isEmpty()){
             throw  new BizException("手机号不能为空");
         }
-        //调用api给用户手机发送验证码
+        //TODO: 调用api给用户手机发送验证码
         SmsCode smsCode=new SmsCode();
         smsCode.setUsed(false);
         smsCode.setPhone(phone);

@@ -18,4 +18,16 @@
         update user SET password = #{password}
         WHERE id = #{userId}
     </update>
+    <update id="updatePoints">
+        update user
+        SET points = points + #{points}
+        WHERE id = #{userId}
+        AND deleted = 0
+    </update>
+    <update id="decreasePoints">
+        update user
+        SET points = points - #{points}
+        WHERE id = #{userId}
+        AND deleted = 0
+    </update>
 </mapper>
