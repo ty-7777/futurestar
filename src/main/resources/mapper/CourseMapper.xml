@@ -38,11 +38,12 @@
     </select>
     <update id="plusCurrentCount">
         UPDATE course_slot
-        SET current_count = current_count + 1
+        SET current_count = current_count + 1,
+            status = IF(current_count >= max_count, 'FULL', 'AVAILABLE')
         WHERE id = #{id}
-        AND  current_count &lt; max_count
-        AND  status = 'AVAILABLE'
-        AND  deleted = 0
+          AND current_count &lt; max_count
+          AND status = 'AVAILABLE'
+          AND deleted = 0
     </update>
     <insert id="createAppointment">
         INSERT INTO course_appointment
@@ -69,7 +70,8 @@
     <update id="decreaseCurrentCount">
         UPDATE course_appointment a
             LEFT JOIN course_slot s ON s.id = a.slot_id
-            SET s.current_count = s.current_count - 1
+            SET s.current_count = s.current_count - 1,
+                s.status = IF(s.current_count &lt; s.max_count, 'AVAILABLE', 'FULL')
         WHERE a.id = #{id} AND s.current_count &gt; 0
     </update>
 </mapper>

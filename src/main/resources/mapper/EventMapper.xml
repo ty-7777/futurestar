@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.situ.futurestar.core.mapper.EventMapper">
+     <select id="eventList" resultType="com.situ.futurestar.core.entity.MatchEvent">
+         SELECT * FROM match_event
+         WHERE type = #{type}
+         AND  deleted = 0
+     </select>
+     <select id="selectById" resultType="com.situ.futurestar.core.entity.MatchEvent">
+         SELECT * FROM match_event
+         WHERE id = #{id}
+        AND  deleted = 0
+     </select>
+    <update id="plus">
+        UPDATE match_event
+        SET current_participants = current_participants + 1
+        WHERE id = #{eventId}
+        AND current_participants &lt; max_participants
+        AND deleted = 0
+    </update>
+    <insert id="signUp" parameterType="com.situ.futurestar.core.entity.EventRegistration">
+        INSERT INTO event_registration
+        ( id ,user_id, event_id,  check_in_status, create_time , update_time, deleted)
+        VALUES (default,#{userId},#{eventId},default,default,default,default )
+    </insert>
+    <select id="myEvent" resultType="com.situ.futurestar.core.entity.MatchEvent">
+        SELECT  b.* FROM event_registration a
+        INNER JOIN  match_event b  ON a.event_id = b.id
+        WHERE a.user_id = #{userId}
+        AND a.deleted = 0
+        AND b.deleted = 0
+    </select>
+    <select id="checkinStatus" resultType="java.lang.String">
+        SELECT check_in_status FROM event_registration
+        WHERE event_id = #{eventId}
+        AND  user_id = #{userId}
+        AND deleted = 0
+    </select>
+    <select id="checkin" resultType="java.lang.String">
+        SELECT  b.status FROM event_registration a
+        INNER JOIN  match_event b  ON a.event_id = b.id
+        WHERE a.user_id = #{userId}
+          AND a.event_id = #{eventId}
+          AND a.deleted = 0
+          AND b.deleted = 0
+    </select>
+    <update id="updateEventStatus" >
+        UPDATE event_registration
+        SET check_in_status = 'CHECKED_IN'
+        WHERE event_id = #{eventId}
+        AND user_id = #{userId}
+        AND check_in_status = 'NOT_CHECKED_IN'
+        AND deleted = 0
+    </update>
+</mapper>
