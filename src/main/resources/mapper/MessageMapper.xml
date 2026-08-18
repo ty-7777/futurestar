@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.situ.futurestar.core.mapper.MessageMapper">
+     <select id="messageList" resultType="com.situ.futurestar.core.entity.Message">
+         SELECT * FROM message
+         WHERE  user_id = #{userId}
+         AND type = #{type}
+         AND deleted = 0
+         ORDER BY create_time DESC
+     </select>
+    <select id="getMessageById" resultType="com.situ.futurestar.core.entity.Message">
+        SELECT * FROM message
+        WHERE  id = #{messageId}
+          AND user_id = #{userId}
+          AND deleted = 0
+    </select>
+    <update id="updateRead">
+        UPDATE message
+        SET is_read = 1
+        WHERE id = #{messageId}
+          AND user_id = #{userId}
+          AND deleted = 0
+    </update>
+    <select id="unreadCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM message
+        WHERE user_id = #{userId}
+        AND is_read = 0
+        AND deleted = 0
+    </select>
+</mapper>

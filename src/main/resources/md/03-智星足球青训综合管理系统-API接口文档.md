@@ -367,7 +367,7 @@
 #### 2.8.4 未读统计
 - **GET** `/api/member/message/unread-count`
 - 需认证
-- 响应 `data`：`{ count: 5 }`
+- 响应 `data`：未读消息数量（数字），如 `5`
 
 ---
 

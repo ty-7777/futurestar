@@ -30,4 +30,43 @@
         WHERE id = #{userId}
         AND deleted = 0
     </update>
+    <update id="updateById">
+        UPDATE user
+        <set>
+            <if test="updateProfileDTO.realName != null">
+                real_name = #{updateProfileDTO.realName},
+            </if>
+            <if test="updateProfileDTO.gender != null">
+                gender = #{updateProfileDTO.gender},
+            </if>
+            <if test="updateProfileDTO.birthDate != null">
+                birth_date = #{updateProfileDTO.birthDate},
+            </if>
+            <if test="updateProfileDTO.height != null">
+                height = #{updateProfileDTO.height},
+            </if>
+            <if test="updateProfileDTO.weight != null">
+                weight = #{updateProfileDTO.weight},
+            </if>
+            <if test="updateProfileDTO.position != null">
+                `position` = #{updateProfileDTO.position},
+            </if>
+            <if test="updateProfileDTO.preferredFoot != null">
+                preferred_foot = #{updateProfileDTO.preferredFoot},
+            </if>
+            <if test="updateProfileDTO.experienceYears != null">
+                experience_years = #{updateProfileDTO.experienceYears},
+            </if>
+            <if test="updateProfileDTO.avatar != null">
+                avatar = #{updateProfileDTO.avatar},
+            </if>
+            <if test="updateProfileDTO.emergencyContact != null">
+                emergency_contact = #{updateProfileDTO.emergencyContact},
+            </if>
+        </set>
+        WHERE id = #{userId}
+        AND deleted = 0
+    </update>
+
+
 </mapper>

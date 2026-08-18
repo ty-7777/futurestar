@@ -1,6 +1,7 @@
 package com.situ.futurestar.core.mapper;
 
 
+import com.situ.futurestar.core.dto.UpdateProfileDTO;
 import com.situ.futurestar.core.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -15,4 +16,5 @@ public interface UserMapper {
 
     void updatePoints(@Param("userId") Long userId,@Param("points") int points);
     void decreasePoints(@Param("userId") Long userId,@Param("points") int points);
+    int updateById(@Param("userId") Long userId, @Param("updateProfileDTO")UpdateProfileDTO updateProfileDTO);
 }
