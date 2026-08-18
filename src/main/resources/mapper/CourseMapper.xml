@@ -74,4 +74,81 @@
                 s.status = IF(s.current_count &lt; s.max_count, 'AVAILABLE', 'FULL')
         WHERE a.id = #{id} AND s.current_count &gt; 0
     </update>
+
+    <!-- ================= 管理端 ================= -->
+    <select id="listAll" resultType="com.situ.futurestar.core.entity.CoursePackage">
+        SELECT * FROM course_package
+        WHERE deleted = 0
+        ORDER BY create_time DESC
+    </select>
+    <insert id="insertPackage" parameterType="com.situ.futurestar.core.entity.CoursePackage"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO course_package
+            (name, cover_url, description, price, coach_name, suitable_level, items, status)
+        VALUES (#{name}, #{coverUrl}, #{description}, #{price}, #{coachName}, #{suitableLevel}, #{items}, #{status})
+    </insert>
+    <update id="updatePackage" parameterType="com.situ.futurestar.core.entity.CoursePackage">
+        UPDATE course_package
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="coverUrl != null">cover_url = #{coverUrl},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="coachName != null">coach_name = #{coachName},</if>
+            <if test="suitableLevel != null">suitable_level = #{suitableLevel},</if>
+            <if test="items != null">items = #{items},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+    <update id="deletePackage">
+        UPDATE course_package
+        SET deleted = 1
+        WHERE id = #{id} AND deleted = 0
+    </update>
+    <select id="listSlots" resultType="com.situ.futurestar.core.entity.CourseSlot">
+        SELECT * FROM course_slot
+        WHERE package_id = #{packageId}
+        <if test="date != null">AND course_date = #{date}</if>
+        AND deleted = 0
+        ORDER BY course_date, time_range
+    </select>
+    <update id="updateSlot">
+        UPDATE course_slot
+        <set>
+            <if test="dto.maxCount != null">max_count = #{dto.maxCount},</if>
+            <if test="dto.status != null and dto.status != ''">status = #{dto.status},</if>
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+    <select id="listAppointments" resultType="com.situ.futurestar.core.vo.CourseAppointmentVO">
+        SELECT
+            a.id, a.user_id, a.package_id, a.slot_id, a.status, a.report_url, a.create_time,
+            p.name AS package_name, p.coach_name,
+            s.course_date, s.time_range
+        FROM course_appointment a
+                 LEFT JOIN course_package p ON p.id = a.package_id
+                 LEFT JOIN course_slot     s ON s.id = a.slot_id
+        WHERE a.deleted = 0
+        <if test="packageId != null">AND a.package_id = #{packageId}</if>
+        <if test="date != null">AND s.course_date = #{date}</if>
+        <if test="status != null and status != ''">AND a.status = #{status}</if>
+        ORDER BY a.create_time DESC
+    </select>
+    <insert id="insertSlot" parameterType="com.situ.futurestar.core.entity.CourseSlot">
+        INSERT INTO course_slot
+            (package_id, course_date, time_range, max_count, current_count, status)
+        VALUES (#{packageId}, #{courseDate}, #{timeRange}, #{maxCount}, #{currentCount}, #{status})
+    </insert>
+    <select id="countSlotByDate" resultType="int">
+        SELECT COUNT(*) FROM course_slot
+        WHERE package_id = #{packageId}
+          AND course_date = #{date}
+          AND deleted = 0
+    </select>
+    <update id="updateReportUrl">
+        UPDATE course_appointment
+        SET report_url = #{reportUrl}
+        WHERE id = #{id} AND deleted = 0
+    </update>
 </mapper>

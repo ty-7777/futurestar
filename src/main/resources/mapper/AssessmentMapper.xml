@@ -30,4 +30,62 @@
         WHERE id = #{id}
         AND deleted = 0
     </select>
+
+    <!-- ================= 管理端 ================= -->
+    <select id="listAllQuestionnaires" resultType="com.situ.futurestar.core.entity.Questionnaire">
+        SELECT * FROM questionnaire
+        WHERE deleted = 0
+        ORDER BY create_time DESC
+    </select>
+    <select id="getQuestionnaireById" resultType="com.situ.futurestar.core.entity.Questionnaire">
+        SELECT * FROM questionnaire
+        WHERE id = #{id}
+        AND deleted = 0
+    </select>
+    <insert id="insertQuestionnaire" parameterType="com.situ.futurestar.core.entity.Questionnaire"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO questionnaire
+            (title, description, status)
+        VALUES (#{title}, #{description}, #{status})
+    </insert>
+    <update id="updateQuestionnaire" parameterType="com.situ.futurestar.core.entity.Questionnaire">
+        UPDATE questionnaire
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+    <update id="deleteQuestionnaire">
+        UPDATE questionnaire
+        SET deleted = 1
+        WHERE id = #{id} AND deleted = 0
+    </update>
+    <update id="updateQuestionnaireStatus">
+        UPDATE questionnaire
+        SET status = #{status}
+        WHERE id = #{id} AND deleted = 0
+    </update>
+    <insert id="insertQuestion" parameterType="com.situ.futurestar.core.entity.Question"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO question
+            (questionnaire_id, content, type, options, sort_order)
+        VALUES (#{questionnaireId}, #{content}, #{type}, #{options}, #{sortOrder})
+    </insert>
+    <update id="updateQuestion" parameterType="com.situ.futurestar.core.entity.Question">
+        UPDATE question
+        <set>
+            <if test="content != null">content = #{content},</if>
+            <if test="type != null and type != ''">type = #{type},</if>
+            <if test="options != null">options = #{options},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+    <update id="deleteQuestion">
+        UPDATE question
+        SET deleted = 1
+        WHERE id = #{id} AND deleted = 0
+    </update>
 </mapper>

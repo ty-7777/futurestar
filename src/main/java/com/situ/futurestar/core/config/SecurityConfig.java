@@ -37,7 +37,8 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // 不用Session
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/send-code",    // 注册/登录/发码 放行
-                                "/api/auth/refresh", "/api/auth/reset-password").permitAll()
+                                "/api/auth/refresh", "/api/auth/reset-password",
+                                "/report/**").permitAll()   // 报告PDF：浏览器直接下载需放行（URL含UUID，靠随机性保护）
                         .requestMatchers("/api/auth/logout").authenticated()   // 登出要登录
                         .requestMatchers("/api/member/**").hasAnyRole("PLAYER", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

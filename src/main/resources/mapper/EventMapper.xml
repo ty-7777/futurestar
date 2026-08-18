@@ -52,4 +52,51 @@
         AND check_in_status = 'NOT_CHECKED_IN'
         AND deleted = 0
     </update>
+
+    <!-- ================= 管理端 ================= -->
+    <select id="listAllEvents" resultType="com.situ.futurestar.core.entity.MatchEvent">
+        SELECT * FROM match_event
+        WHERE deleted = 0
+        <if test="status != null and status != ''">AND status = #{status}</if>
+        ORDER BY create_time DESC
+    </select>
+    <insert id="insertEvent" parameterType="com.situ.futurestar.core.entity.MatchEvent"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO match_event
+            (title, type, cover_url, content, registration_start, registration_end,
+             activity_start, activity_end, max_participants, status)
+        VALUES (#{title}, #{type}, #{coverUrl}, #{content}, #{registrationStart}, #{registrationEnd},
+                #{activityStart}, #{activityEnd}, #{maxParticipants}, #{status})
+    </insert>
+    <update id="updateEvent" parameterType="com.situ.futurestar.core.entity.MatchEvent">
+        UPDATE match_event
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="type != null and type != ''">type = #{type},</if>
+            <if test="coverUrl != null">cover_url = #{coverUrl},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="registrationStart != null">registration_start = #{registrationStart},</if>
+            <if test="registrationEnd != null">registration_end = #{registrationEnd},</if>
+            <if test="activityStart != null">activity_start = #{activityStart},</if>
+            <if test="activityEnd != null">activity_end = #{activityEnd},</if>
+            <if test="maxParticipants != null">max_participants = #{maxParticipants},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+    <update id="deleteEvent">
+        UPDATE match_event
+        SET deleted = 1
+        WHERE id = #{id} AND deleted = 0
+    </update>
+    <select id="listRegistrations" resultType="com.situ.futurestar.core.vo.EventRegistrationVO">
+        SELECT
+            a.id, a.user_id, a.check_in_status, a.create_time,
+            u.real_name AS player_name, u.phone, u.`position`, u.member_level
+        FROM event_registration a
+                 LEFT JOIN user u ON u.id = a.user_id
+        WHERE a.event_id = #{eventId}
+          AND a.deleted = 0
+        ORDER BY a.create_time DESC
+    </select>
 </mapper>

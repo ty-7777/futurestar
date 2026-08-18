@@ -28,4 +28,17 @@
         AND is_read = 0
         AND deleted = 0
     </select>
+
+    <!-- ================= 管理端 ================= -->
+    <select id="listAll" resultType="com.situ.futurestar.core.entity.Message">
+        SELECT * FROM message
+        WHERE deleted = 0
+        ORDER BY create_time DESC
+    </select>
+    <insert id="insert" parameterType="com.situ.futurestar.core.entity.Message"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO message
+            (user_id, title, content, type, is_read)
+        VALUES (#{userId}, #{title}, #{content}, #{type}, #{isRead})
+    </insert>
 </mapper>
