@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -48,6 +49,12 @@ public class GlobalExceptionHandler {
             HttpRequestMethodNotSupportedException.class})
     public ResponseEntity<Result<Void>> handleBadRequest(Exception e) {
         return build(Result.error(ErrorCode.BAD_REQUEST, "请求参数错误"), ErrorCode.BAD_REQUEST);
+    }
+
+    /** 认证失败（如登录密码错误） */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Result<Void>> handleAuthentication(AuthenticationException e) {
+        return build(Result.error(ErrorCode.UNAUTHORIZED, "手机号或密码错误"), ErrorCode.UNAUTHORIZED);
     }
 
     /** 无权限 */

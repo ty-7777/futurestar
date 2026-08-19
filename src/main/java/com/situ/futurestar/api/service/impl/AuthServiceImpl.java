@@ -16,6 +16,7 @@ import com.situ.futurestar.core.vo.LoginVO;
 import com.situ.futurestar.core.vo.TokenVO;
 import com.situ.futurestar.core.vo.UserVO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -31,6 +32,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -72,14 +74,17 @@ public class AuthServiceImpl implements AuthService {
             //被限流
             throw new BizException(ErrorCode.TOO_MANY_REQUESTS, "发送过于频繁，请稍后再试");
         }
-        //TODO: 调用api给用户手机发送验证码
-        SmsCode smsCode=new SmsCode();
+        //TODO: 调用api给用户手机发送验证码（短信 SDK 未接入前先打日志，便于联调取码）
+        String code = String.valueOf((int) (Math.random() * 900000) + 100000);
+        SmsCode smsCode = new SmsCode();
+        smsCode.setCode(code);
         smsCode.setUsed(false);
         smsCode.setPhone(phone);
         smsCode.setExpireTime(LocalDateTime.now().plusMinutes(2));//设置过期时间两分钟
 
         //把验明码存入数据库中
         smsCodeMapper.insert(smsCode);
+        log.info("短信验证码 phone={}, code={}", phone, code);
         return Result.success();
     }
 

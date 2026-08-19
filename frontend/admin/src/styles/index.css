@@ -1,0 +1,107 @@
+/* =====================================================================
+   智星足球青训 · 管理端设计系统 v3（商务高级风格）
+   原则：沉稳 · 克制 · 有层次
+   - 配色：品牌蓝作点缀，结构靠中性色与细分隔线
+   - 阴影：柔和中性（去蓝调），卡片悬浮有层次
+   - 排版：页面标题 20px/700，正文 14，辅助 12-13
+   - 间距：页面 20px 内边距，卡片 16-20px，区块间距 16px
+   ===================================================================== */
+:root {
+  /* ---- 品牌主色（与会员端一致，仅作点缀） ---- */
+  --el-color-primary: #2f7cff;
+  --el-color-primary-light-3: #6da4ff;
+  --el-color-primary-light-5: #9cc2ff;
+  --el-color-primary-light-7: #c9dcff;
+  --el-color-primary-light-8: #e0ebff;
+  --el-color-primary-light-9: #f2f6ff;
+  --el-color-primary-dark-2: #1e5fd8;
+
+  /* ---- 中性色 ---- */
+  --el-text-color-primary: #1d2129;
+  --el-text-color-regular: #5b6470;
+  --el-text-color-secondary: #98a1b0;
+  --el-text-color-placeholder: #98a1b0;
+  --el-border-color: #e4e7ed;
+  --el-border-color-light: #eef1f6;
+  --el-border-color-lighter: #f3f5f9;
+  --el-bg-color-page: #f5f7fb;
+  --el-bg-color: #ffffff;
+  --el-fill-color-light: #f5f7fb;
+  --el-fill-color-lighter: #f8fafc;
+
+  /* ---- 圆角 ---- */
+  --el-border-radius-base: 8px;
+  --el-border-radius-small: 6px;
+  --el-border-radius-round: 999px;
+
+  /* ---- 阴影（商务风：柔和中性） ---- */
+  --el-box-shadow-light: 0 1px 2px rgba(16, 24, 40, 0.04), 0 2px 8px rgba(16, 24, 40, 0.05);
+  --el-box-shadow: 0 4px 16px rgba(16, 24, 40, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: #f5f7fb;
+  color: #1d2129;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- 通用卡片 ---- */
+.fs-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 2px 8px rgba(16, 24, 40, 0.05);
+}
+
+/* ---- 页面标题体系 ---- */
+.page-head {
+  margin-bottom: 16px;
+}
+.page-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1d2129;
+  letter-spacing: 0.5px;
+}
+.page-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #98a1b0;
+}
+
+/* ---- 表格：细分隔线 + 表头置灰加粗 ---- */
+.el-table {
+  --el-table-header-bg-color: #f8fafc;
+  --el-table-header-text-color: #5b6470;
+  --el-table-border-color: #f0f2f6;
+  --el-table-row-hover-bg-color: #f7faff;
+}
+.el-table th.el-table__cell {
+  font-weight: 600;
+}
+
+/* ---- 弹窗圆角 ---- */
+.el-dialog {
+  border-radius: 12px;
+}
+
+/* ---- 页面切换动效 ---- */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}

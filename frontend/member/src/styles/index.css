@@ -1,0 +1,168 @@
+/* =====================================================================
+   智星足球青训 · 设计系统 v2
+   设计原则：清爽 · 运动 · 质感
+   1. 配色：品牌蓝 #2f7cff + 青色渐变；功能色/中性色明确，保证对比度
+   2. 排版：16/14/12 三级字号；标题加粗+字距，正文 1.6 行高
+   3. 间距：4px 基准刻度（4/8/12/16/24），页面统一 16px 侧边距
+   4. 组件：圆角 12(8/16) + 柔和蓝色阴影；按压微动效
+   5. 动效：150-200ms ease；页面切换 fade-slide
+   ===================================================================== */
+:root {
+  /* ---- 品牌色 ---- */
+  --fs-primary: #2f7cff;
+  --fs-primary-dark: #1e5fd8;
+  --fs-primary-light: #eaf2ff;
+  --fs-gradient: linear-gradient(135deg, #2f7cff 0%, #46c3ff 100%);
+
+  /* ---- 功能色 ---- */
+  --fs-success: #07c160;
+  --fs-warning: #ff976a;
+  --fs-danger: #ee0a24;
+
+  /* ---- 中性色 ---- */
+  --fs-bg: #f5f7fb;
+  --fs-card: #ffffff;
+  --fs-text-1: #1d2129;
+  --fs-text-2: #5b6470;
+  --fs-text-3: #98a1b0;
+  --fs-border: #eef1f6;
+
+  /* ---- 间距（4px 基准）---- */
+  --fs-space-1: 4px;
+  --fs-space-2: 8px;
+  --fs-space-3: 12px;
+  --fs-space-4: 16px;
+  --fs-space-5: 24px;
+  --fs-page-padding: 16px;
+
+  /* ---- 圆角 ---- */
+  --fs-radius-sm: 8px;
+  --fs-radius: 12px;
+  --fs-radius-lg: 16px;
+
+  /* ---- 阴影 ---- */
+  --fs-shadow: 0 2px 12px rgba(47, 124, 255, 0.06);
+  --fs-shadow-lg: 0 8px 28px rgba(47, 124, 255, 0.14);
+
+  /* ---- 动效 ---- */
+  --fs-duration: 0.18s;
+  --fs-easing: ease;
+
+  /* ---- Vant 主题映射 ---- */
+  --van-primary-color: #2f7cff;
+  --van-success-color: #07c160;
+  --van-warning-color: #ff976a;
+  --van-danger-color: #ee0a24;
+  --van-background: #f5f7fb;
+  --van-nav-bar-background: #ffffff;
+  --van-nav-bar-icon-color: #1d2129;
+  --van-nav-bar-text-color: #2f7cff;
+  --van-nav-bar-title-text-color: #1d2129;
+  --van-tabbar-background: #ffffff;
+  --van-tabbar-item-active-color: #2f7cff;
+  --van-tabs-bottom-bar-color: #2f7cff;
+  --van-button-primary-background: #2f7cff;
+  --van-button-primary-border-color: #2f7cff;
+  --van-field-label-color: #5b6470;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--fs-bg);
+  color: var(--fs-text-1);
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+/* ---- 通用卡片 ---- */
+.fs-card {
+  background: var(--fs-card);
+  border-radius: var(--fs-radius);
+  box-shadow: var(--fs-shadow);
+}
+
+/* ---- 渐变品牌面 ---- */
+.fs-gradient {
+  background: var(--fs-gradient);
+  color: #fff;
+}
+
+/* ---- 区块标题 ---- */
+.fs-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--fs-text-1);
+}
+
+/* ---- 按压微动效 ---- */
+.fs-press {
+  transition: transform var(--fs-duration) var(--fs-easing);
+}
+.fs-press:active {
+  transform: scale(0.97);
+}
+
+/* ---- 页面切换动效 ---- */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+/* ---- 导航栏：毛玻璃白底 + 细分割线 ---- */
+.van-nav-bar {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+}
+
+/* ---- 渐变主按钮（全站 CTA 统一品牌渐变） ---- */
+.van-button--primary:not(.van-button--plain) {
+  background: var(--fs-gradient);
+  border-color: transparent;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.van-button--primary:not(.van-button--plain):active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+.van-button--primary.van-button--round:not(.van-button--plain):not(.van-button--disabled) {
+  box-shadow: 0 4px 14px rgba(47, 124, 255, 0.3);
+}
+.van-button--primary.van-button--disabled {
+  background: #c9d6f0;
+  border-color: transparent;
+}
+
+/* ---- 渐变主标签 ---- */
+.van-tag--primary:not(.van-tag--plain) {
+  background: var(--fs-gradient);
+}
+
+/* ---- 未读红点微调 ---- */
+.van-tabbar-item__badge {
+  border: 2px solid #fff;
+}
