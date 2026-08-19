@@ -37,8 +37,7 @@
 {
   "code": 409,
   "message": "该时段名额已满",
-  "data": null,
-  "traceId": "abc123def456"
+  "data": null
 }
 ```
 
@@ -86,7 +85,8 @@
 | phone | string | 是 | 手机号 |
 
 - 响应：`data: null`
-- 限流：同手机号 3 次/分钟，10 次/天
+- 手机号格式：`1[3-9]xxxxxxxxx`（11 位，否则 400）
+- 限流：同手机号 60 秒内最多 3 次，超限返回 `429`
 
 #### 2.1.2 注册
 - **POST** `/api/auth/register`
@@ -110,6 +110,27 @@
 | password | string | 是 | 密码 |
 
 - 成功响应：`data: { accessToken, refreshToken, user }`
+
+`user` 结构：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 用户 ID |
+| phone | string | 手机号 |
+| realName | string | 真实姓名 |
+| gender | string | 性别 |
+| birthDate | date | 出生日期 |
+| height | number | 身高(cm) |
+| weight | number | 体重(kg) |
+| position | string | 场上位置：FORWARD/MIDFIELDER/DEFENDER/GOALKEEPER |
+| preferredFoot | string | 惯用脚：LEFT/RIGHT/BOTH |
+| experienceYears | integer | 球龄(年) |
+| avatar | string | 头像 URL |
+| emergencyContact | string | 紧急联系人电话 |
+| memberLevel | string | 会员等级：NORMAL/SILVER/GOLD/PLATINUM/DIAMOND |
+| points | integer | 积分 |
+| status | string | ENABLED/DISABLED |
+| role | string | PLAYER/ADMIN |
 
 #### 2.1.4 刷新 Token
 - **POST** `/api/auth/refresh`
@@ -136,7 +157,7 @@
 | code | string | 是 | 短信验证码 |
 | password | string | 是 | 新密码 |
 
-- 成功后强制该用户所有 Token 下线
+- 成功后删除该用户所有 Refresh Token（存量 Access Token 到期前仍有效，需重新登录获取新 Token）
 
 ---
 
@@ -160,12 +181,30 @@
 | recordedAt | datetime | 否 | 记录时间，不传默认当前时间（用于补录历史数据） |
 | memo | string | 否 | 备注 |
 
-- 系统自动计算 BMI，超出阈值自动生成提醒并推送
+- 系统自动计算 BMI；指标超标时调用 AI 生成个性化训练/饮食建议，作为站内消息（type=PHYSICAL）内容推送
 
 #### 2.2.2 查询历史记录
 - **GET** `/api/member/physical?pageNum=1&pageSize=10`
 - 需认证
-- 响应 `data`：分页，`list` 为体能记录列表（倒序）
+- 响应 `data`：分页（`total/list/pageNum/pageSize/pages`），`list` 元素为体能记录（倒序）：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 记录 ID |
+| userId | integer | 用户 ID |
+| height | number | 身高(cm) |
+| weight | number | 体重(kg) |
+| bmi | number | BMI（服务端自动计算） |
+| bodyFatRate | number | 体脂率(%) |
+| heartRate | integer | 静息心率 |
+| vitalCapacity | integer | 肺活量(ml) |
+| sprint30m | number | 30米冲刺(秒) |
+| standingLongJump | number | 立定跳远(cm) |
+| verticalJump | number | 原地纵跳(cm) |
+| enduranceRun | integer | 12分钟耐力跑(米) |
+| memo | string | 备注 |
+| recordedAt | datetime | 记录时间 |
+| createTime | datetime | 创建时间 |
 
 #### 2.2.3 趋势分析
 - **GET** `/api/member/physical/trend?months=6`
@@ -187,12 +226,29 @@
 #### 2.3.1 问卷列表
 - **GET** `/api/member/assessment/questionnaires`
 - 需认证
-- 响应 `data`：已发布问卷列表
+- 响应 `data`：已发布问卷列表，元素字段：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 问卷 ID |
+| title | string | 问卷标题 |
+| description | string | 问卷描述 |
+| status | string | DRAFT 草稿 / PUBLISHED 已发布 |
+| createTime | datetime | 创建时间 |
 
 #### 2.3.2 获取问卷题目
 - **GET** `/api/member/assessment/questionnaires/{id}/questions`
 - 需认证
-- 响应 `data`：题目列表（含类型、选项）
+- 响应 `data`：题目列表：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 题目 ID |
+| questionnaireId | integer | 所属问卷 ID |
+| content | string | 题目内容 |
+| type | string | SINGLE 单选 / MULTIPLE 多选 / TEXT 文本 |
+| options | string | 选项 JSON 数组（SINGLE/MULTIPLE 有值） |
+| sortOrder | integer | 排序号 |
 
 #### 2.3.3 提交评测
 - **POST** `/api/member/assessment`
@@ -204,11 +260,20 @@
 | answers | json | 是 | 答案快照（见详细设计文档 6.3.7） |
 
 - 系统调用 AI 评分并生成建议，赠送 20 积分
-- 响应 `data`：`{ id, aiScore, aiSuggestion }`
+- 响应 `data`：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 评测结果 ID |
+| aiScore | integer | AI 评分（百分制） |
+| aiSuggestion | string | AI 建议 |
+| answers | string | 答案快照（回显提交内容） |
+| createTime | datetime | 创建时间 |
 
 #### 2.3.4 评测历史
 - **GET** `/api/member/assessment/history?pageNum=1&pageSize=10`
 - 需认证
+- 响应 `data`：分页，`list` 元素字段同 2.3.3（id/aiScore/aiSuggestion/answers/createTime）
 
 #### 2.3.5 评测详情
 - **GET** `/api/member/assessment/{id}`
@@ -232,6 +297,7 @@
 #### 2.4.2 会话列表
 - **GET** `/api/member/chat/session/list`
 - 需认证
+- 响应 `data`：会话列表，元素字段同 2.4.1（id/sessionName）
 
 #### 2.4.3 发送消息（流式）
 - **POST** `/api/member/chat/session/{id}/stream`
@@ -247,6 +313,14 @@
 #### 2.4.4 对话历史
 - **GET** `/api/member/chat/session/{id}/messages`
 - 需认证
+- 响应 `data`：消息列表（时间正序），元素字段：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 消息 ID |
+| role | string | user 用户 / assistant AI |
+| message | string | 消息内容 |
+| createTime | datetime | 创建时间 |
 
 #### 2.4.5 删除会话
 - **DELETE** `/api/member/chat/session/{id}`
@@ -259,16 +333,41 @@
 #### 2.5.1 课程套餐列表
 - **GET** `/api/member/course/packages?pageNum=1&pageSize=10`
 - 需认证
-- 响应 `data`：课程套餐列表（含课程名、教练、价格、适合水平、项目）
+- 响应 `data`：分页，`list` 元素为套餐：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 套餐 ID |
+| name | string | 课程名称 |
+| coverUrl | string | 封面图 |
+| description | string | 描述 |
+| price | integer | 价格（积分） |
+| coachName | string | 授课教练 |
+| suitableLevel | string | 适合水平 |
+| items | string | 训练项目（JSON 字符串） |
+| status | string | ENABLED/DISABLED |
+| createTime | datetime | 创建时间 |
 
 #### 2.5.2 套餐详情
 - **GET** `/api/member/course/packages/{id}`
 - 需认证
+- 响应 `data`：套餐详情（字段同 2.5.1 列表元素）
 
 #### 2.5.3 可预约时段
 - **GET** `/api/member/course/packages/{id}/slots?date=2026-08-15`
 - 需认证
-- 响应 `data`：该日可预约时段列表（含剩余名额）
+- 响应 `data`：该日可预约时段列表：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 时段 ID |
+| packageId | integer | 套餐 ID |
+| courseDate | date | 上课日期 |
+| timeRange | string | 时间段，如 18:00-19:30 |
+| maxCount | integer | 最大人数 |
+| currentCount | integer | 当前已约人数 |
+| remaining | integer | 剩余名额（maxCount - currentCount） |
+| status | string | AVAILABLE 可约 / FULL 已满 / CLOSED 已关闭 |
 
 #### 2.5.4 提交预约
 - **POST** `/api/member/course/appointment`
@@ -282,27 +381,60 @@
 - 业务冲突：积分不足 / 名额已满 → 409
 
 #### 2.5.5 我的预约
-- **GET** `/api/member/course/appointment/list?pageNum=1&pageSize=10&status=`
+- **GET** `/api/member/course/appointment/list?pageNum=1&pageSize=10&status=PENDING`
 - 需认证
-- 响应 `data`：预约记录（含课程、时段、状态、报告地址）
+- `status`：不传默认 `PENDING`；可选 PENDING/CONFIRMED/CANCELED/COMPLETED（注意：传空串会报"状态名不合法"，请省略该参数或传合法值）
+- 响应 `data`：分页，`list` 元素：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 预约 ID |
+| userId | integer | 用户 ID |
+| packageId | integer | 套餐 ID |
+| packageName | string | 套餐名称 |
+| coachName | string | 教练姓名 |
+| slotId | integer | 时段 ID |
+| courseDate | date | 上课日期 |
+| timeRange | string | 时间段 |
+| status | string | PENDING 待确认 / CONFIRMED 已确认 / CANCELED 已取消 / COMPLETED 已完成 |
+| reportUrl | string | 报告地址（未生成时为 null） |
+| createTime | datetime | 创建时间 |
 
 #### 2.5.6 取消预约
 - **POST** `/api/member/course/appointment/{id}/cancel`
 - 需认证
-- 退还积分、释放名额，发送取消短信
+- 退还积分、释放名额；课程已结束/进行中、重复取消会被拒绝
 
 #### 2.5.7 查看报告
 - **GET** `/api/member/course/appointment/{id}/report`
-- 需认证（仅本人或管理员）
-- 返回带 5 分钟签名签发的 PDF 下载地址
+- 需认证（仅本人，访问他人预约返回 403）
+- 响应 `data`：报告 URL 字符串（如 `/report/202608/xxxx.pdf`，浏览器可直接访问下载）；未生成报告返回错误
 
 ---
 
 ### 2.6 赛事活动 `/api/member/event`
 
 #### 2.6.1 活动列表
-- **GET** `/api/member/event?pageNum=1&pageSize=10&type=`
+- **GET** `/api/member/event?pageNum=1&pageSize=10&type=MATCH`
 - 需认证
+- `type`：必填，可选 MATCH 比赛 / CAMP 训练营 / SELECTION 选拔
+- 响应 `data`：分页，`list` 元素为活动：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 活动 ID |
+| title | string | 活动标题 |
+| type | string | MATCH/CAMP/SELECTION |
+| coverUrl | string | 封面图 |
+| content | string | 活动内容 |
+| registrationStart | datetime | 报名开始时间 |
+| registrationEnd | datetime | 报名截止时间 |
+| activityStart | datetime | 活动开始时间 |
+| activityEnd | datetime | 活动结束时间 |
+| maxParticipants | integer | 人数上限 |
+| currentParticipants | integer | 当前已报名人数 |
+| status | string | DRAFT 草稿 / REGISTRATING 报名中 / IN_PROGRESS 进行中 / ENDED 已结束 |
+| createTime | datetime | 创建时间 |
 
 #### 2.6.2 活动详情
 - **GET** `/api/member/event/{id}`
@@ -337,7 +469,20 @@
 
 #### 2.7.2 更新个人信息
 - **PUT** `/api/member/profile`
-- 请求体：个人信息字段（含场上位置、惯用脚、球龄等）
+- 请求体：全部可选，传哪个更新哪个（未传字段保持不变）：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| realName | string | 否 | 真实姓名 |
+| gender | string | 否 | 性别 |
+| birthDate | date | 否 | 出生日期 |
+| height | number | 否 | 身高(cm) |
+| weight | number | 否 | 体重(kg) |
+| position | string | 否 | 场上位置 |
+| preferredFoot | string | 否 | 惯用脚 |
+| experienceYears | integer | 否 | 球龄(年) |
+| avatar | string | 否 | 头像 URL |
+| emergencyContact | string | 否 | 紧急联系人电话 |
 
 #### 2.7.3 修改密码
 - **PUT** `/api/member/profile/password`
@@ -353,8 +498,19 @@
 ### 2.8 消息通知 `/api/member/message`
 
 #### 2.8.1 消息列表
-- **GET** `/api/member/message?pageNum=1&pageSize=10&type=`
+- **GET** `/api/member/message?pageNum=1&pageSize=10&type=SYSTEM`
 - 需认证
+- `type`：必填，可选 COURSE 课程 / EVENT 赛事 / PHYSICAL 体能 / SYSTEM 系统
+- 响应 `data`：分页，`list` 元素：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 消息 ID |
+| title | string | 消息标题 |
+| content | string | 消息内容 |
+| type | string | COURSE/EVENT/PHYSICAL/SYSTEM |
+| isRead | boolean | 是否已读（0 未读 / 1 已读） |
+| createTime | datetime | 创建时间 |
 
 #### 2.8.2 消息详情
 - **GET** `/api/member/message/{id}`
@@ -397,12 +553,47 @@
 #### 3.2.1 球员列表
 - **GET** `/api/admin/players?pageNum=1&pageSize=10&keyword=&position=&status=`
 - 需 ADMIN
-- `keyword`：姓名/手机号模糊搜索；`position`：场上位置筛选
+- `keyword`：姓名/手机号模糊搜索；`position`：场上位置筛选；`status`：ENABLED/DISABLED 筛选
+- 响应 `data`：分页，`list` 元素：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 球员 ID |
+| phone | string | 手机号 |
+| realName | string | 姓名 |
+| gender | string | 性别 |
+| position | string | 场上位置 |
+| preferredFoot | string | 惯用脚 |
+| experienceYears | integer | 球龄(年) |
+| memberLevel | string | 会员等级 |
+| points | integer | 积分 |
+| status | string | ENABLED/DISABLED |
+| createTime | datetime | 创建时间 |
 
 #### 3.2.2 球员详情
 - **GET** `/api/admin/players/{id}`
 - 需 ADMIN
-- 响应 `data`：基本信息 + 积分 + 体能记录 + 预约记录
+- 响应 `data`：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 球员 ID |
+| phone | string | 手机号 |
+| realName | string | 姓名 |
+| gender | string | 性别 |
+| birthDate | date | 出生日期 |
+| height | number | 身高(cm) |
+| weight | number | 体重(kg) |
+| position | string | 场上位置 |
+| preferredFoot | string | 惯用脚 |
+| experienceYears | integer | 球龄(年) |
+| avatar | string | 头像 |
+| emergencyContact | string | 紧急联系人 |
+| memberLevel | string | 会员等级 |
+| points | integer | 积分 |
+| status | string | ENABLED/DISABLED |
+| physicalRecords | array | 体能记录列表（字段见 2.2.2） |
+| appointments | array | 预约记录列表（字段见 3.3.4） |
 
 #### 3.2.3 启用/禁用
 - **PUT** `/api/admin/players/{id}/status`
@@ -449,8 +640,10 @@
 | price | integer | 是 | 价格（积分） |
 | coachName | string | 否 | 授课教练 |
 | suitableLevel | string | 否 | 适合水平 |
-| items | json | 否 | 训练项目数组 |
+| items | string | 否 | 训练项目（JSON 字符串） |
 | status | string | 否 | ENABLED/DISABLED |
+
+- 套餐列表响应 `data`：分页，`list` 元素字段 = 请求体字段 + `id`、`createTime`、`updateTime`
 
 #### 3.3.2 批量生成时段
 - **POST** `/api/admin/course/packages/{id}/slots/batch`
@@ -461,20 +654,36 @@
 | startDate | date | 是 | 开始日期 |
 | endDate | date | 是 | 结束日期 |
 | timeRange | string | 是 | 时间段，如 `18:00-19:30` |
-| maxCount | integer | 是 | 每时段最大人数 |
+| maxCount | integer | 是 | 每时段最大人数（1~100） |
 
 #### 3.3.3 时段管理
 - **GET** `/api/admin/course/slots?packageId=&date=`
-- **PUT** `/api/admin/course/slots/{id}`（修改最大人数/状态）
+- `packageId`：必填；`date`：可选
+- 响应 `data`：时段列表，元素字段：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 时段 ID |
+| packageId | integer | 套餐 ID |
+| courseDate | date | 上课日期 |
+| timeRange | string | 时间段 |
+| maxCount | integer | 最大人数 |
+| currentCount | integer | 当前已约人数 |
+| status | string | AVAILABLE/FULL/CLOSED |
+| createTime | datetime | 创建时间 |
+
+- **PUT** `/api/admin/course/slots/{id}`（修改最大人数/状态），请求体：`{ maxCount?, status? }`（可选，传哪个改哪个）
 
 #### 3.3.4 预约管理
 - **GET** `/api/admin/course/appointments?pageNum=1&pageSize=10&packageId=&date=&status=`
 - 需 ADMIN
+- 响应 `data`：分页，`list` 元素字段同 2.5.5（id/userId/packageId/packageName/coachName/slotId/courseDate/timeRange/status/reportUrl/createTime）
 
 #### 3.3.5 上传报告
 - **POST** `/api/admin/course/appointments/{id}/report`（multipart/form-data，字段名 `file`）
 - 仅允许 PDF，≤20MB
 - 存储到 `data/upload/report/yyyyMM/{uuid}.pdf`
+- 响应 `data`：报告 URL 字符串（如 `/report/202608/xxxx.pdf`）
 
 ---
 
@@ -485,7 +694,17 @@
 - **POST** `/api/admin/assessment/questionnaires`
 - **PUT** `/api/admin/assessment/questionnaires/{id}`
 - **DELETE** `/api/admin/assessment/questionnaires/{id}`
-- 发布/下架：`PUT /api/admin/assessment/questionnaires/{id}/status`
+- 发布/下架：`PUT /api/admin/assessment/questionnaires/{id}/status`（请求体 `{ status: "PUBLISHED" | "DRAFT" }`）
+
+新增/修改请求体：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| title | string | 是 | 问卷标题 |
+| description | string | 否 | 问卷描述 |
+| status | string | 否 | DRAFT 草稿 / PUBLISHED 已发布 |
+
+- 问卷列表响应 `data`：分页，`list` 元素字段 = 请求体字段 + `id`、`createTime`
 
 #### 3.4.2 题目 CRUD
 - **GET** `/api/admin/assessment/questionnaires/{id}/questions`
@@ -512,20 +731,38 @@
 - **PUT** `/api/admin/event/{id}`
 - **DELETE** `/api/admin/event/{id}`
 
-活动请求体：
+新增/修改请求体：
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | title | string | 是 | 活动标题 |
 | type | string | 否 | MATCH/CAMP/SELECTION |
+| coverUrl | string | 否 | 封面图 |
 | content | string | 否 | 内容 |
-| registrationStart/End | datetime | 否 | 报名起止 |
-| activityStart/End | datetime | 否 | 活动起止 |
+| registrationStart | datetime | 否 | 报名开始时间 |
+| registrationEnd | datetime | 否 | 报名截止时间 |
+| activityStart | datetime | 否 | 活动开始时间 |
+| activityEnd | datetime | 否 | 活动结束时间 |
 | maxParticipants | integer | 否 | 人数上限 |
+| status | string | 否 | DRAFT/REGISTRATING/IN_PROGRESS/ENDED |
+
+- 活动列表响应 `data`：分页，`list` 元素字段 = 请求体字段 + `id`、`currentParticipants`、`createTime`
 
 #### 3.5.2 报名列表
 - **GET** `/api/admin/event/{id}/registrations?pageNum=1&pageSize=10`
 - 需 ADMIN
+- 响应 `data`：分页，`list` 元素：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 报名 ID |
+| userId | integer | 用户 ID |
+| playerName | string | 球员姓名 |
+| phone | string | 手机号 |
+| position | string | 场上位置 |
+| memberLevel | string | 会员等级 |
+| checkInStatus | string | NOT_CHECKED_IN 未签到 / CHECKED_IN 已签到 |
+| createTime | datetime | 报名时间 |
 
 ---
 
@@ -534,6 +771,7 @@
 #### 3.6.1 消息列表
 - **GET** `/api/admin/message?pageNum=1&pageSize=10`
 - 需 ADMIN
+- 响应 `data`：分页，`list` 元素字段 = 2.8.1 的字段 + `userId`
 
 #### 3.6.2 推送消息（单个）
 - **POST** `/api/admin/message/send`
@@ -557,10 +795,20 @@
 #### 3.7.1 配置列表
 - **GET** `/api/admin/config`
 - 需 ADMIN
+- 响应 `data`：配置列表，元素字段：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer | 配置 ID |
+| configKey | string | 配置键 |
+| configValue | string | 配置值 |
+| description | string | 配置描述 |
+| createTime | datetime | 创建时间 |
 
 #### 3.7.2 获取配置
 - **GET** `/api/admin/config/{key}`
 - 需 ADMIN
+- 响应 `data`：单个配置（字段同 3.7.1）
 
 #### 3.7.3 更新配置
 - **PUT** `/api/admin/config/{key}`
@@ -573,9 +821,10 @@
 
 | 接口前缀 | 允许角色 |
 |---------|---------|
-| `/api/auth/**`、`/api/sms/**` | 公开（部分需认证） |
+| `/api/auth/**` | 公开（login/register/send-code/refresh/reset-password 放行，logout 需登录） |
 | `/api/member/**` | PLAYER、ADMIN |
 | `/api/admin/**` | ADMIN |
+| `/report/**` | 公开（报告 PDF 下载） |
 
 ---
 

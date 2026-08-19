@@ -330,6 +330,9 @@ CREATE TABLE IF NOT EXISTS sys_config (
 -- 系统配置初始化
 INSERT INTO sys_config (config_key, config_value, description) VALUES
 ('ai_chat_system_prompt', '你是一位专业的足球青训顾问，请结合青少年球员的体能、身高、体型等数据，用易懂的语言提供训练与饮食建议。', 'AI对话系统提示词'),
+('ai_assessment_prompt', '你是一位专业足球青训教练，根据问卷答案对学员进行百分制评分并给出针对性建议。', 'AI评测提示词'),
+('ai_guidance_training_prompt', '你是足球青训教练，根据学员体能数据和异常指标给出具体训练建议。', 'AI训练指导提示词'),
+('ai_guidance_diet_prompt', '你是青少年运动营养师，根据学员体能数据和异常指标给出饮食建议。', 'AI饮食指导提示词'),
 ('register_bonus_points', '100', '注册赠送积分'),
 ('checkin_bonus_points', '50', '活动签到赠送积分'),
 ('physical_assessment_min_score', '60', '体能评测及格分数线'),

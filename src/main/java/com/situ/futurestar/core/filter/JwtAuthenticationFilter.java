@@ -39,13 +39,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
               try {
                   Long userId = jwtUtil.parseUserId(token); // 解析失败会抛异常
                   String jti = jwtUtil.parseJti(token);//拿到这个token的唯一id
+                  // 只允许 access token 走 API 认证；refresh token（7天期）不能当 access 用
+                  if(!"access".equals(jwtUtil.parseType(token))){
+                      filterChain.doFilter(request,response);
+                      return;
+                  }
                   if(stringRedisTemplate.hasKey(BLACK_LIST+jti)){//判断redis的黑名单里有没有这个token
                       // 这张 access token 被拉黑过 → 不设身份 → 走 401
                       filterChain.doFilter(request,response);
                       return;
                   }
                   User user = userMapper.selectById(userId);
-                  if(user!=null){
+                  // 用户不存在或被禁用（管理端禁用后存量token立即失效）都不放行
+                  if(user != null && "ENABLED".equals(user.getStatus())){
                       // 3. 把用户身份放进 SecurityContext
                       var authentication = new UsernamePasswordAuthenticationToken(
                               user,                            // principal：放你的实体User，后面Controller直接取

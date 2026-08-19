@@ -63,6 +63,12 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(getKey()).build()
                 .parseSignedClaims(token).getPayload().getId();
     }
+    //取token的类型：access 或 refresh
+    public String parseType(String token){
+        Claims claims = Jwts.parser().verifyWith(getKey()).build()
+                .parseSignedClaims(token).getPayload();
+        return claims.get("type", String.class);
+    }
     public long getRemainingMills(String token){
         Claims claims = Jwts.parser()
                 .verifyWith(getKey())

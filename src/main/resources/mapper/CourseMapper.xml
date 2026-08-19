@@ -65,6 +65,7 @@
         UPDATE course_appointment
         SET status = 'CANCELED'
         WHERE id = #{id}
+        AND status IN ('PENDING', 'CONFIRMED')
         AND deleted = 0
     </update>
     <update id="decreaseCurrentCount">
@@ -151,4 +152,39 @@
         SET report_url = #{reportUrl}
         WHERE id = #{id} AND deleted = 0
     </update>
+
+    <!-- ================= 定时任务 ================= -->
+    <update id="completeFinishedAppointments">
+        UPDATE course_appointment a
+            INNER JOIN course_slot s ON s.id = a.slot_id
+        SET a.status = 'COMPLETED'
+        WHERE a.status = 'CONFIRMED'
+          AND s.course_date &lt; #{today}
+          AND a.deleted = 0
+    </update>
+    <update id="closeExpiredSlots">
+        UPDATE course_slot
+        SET status = 'CLOSED'
+        WHERE course_date &lt; #{today}
+          AND status != 'CLOSED'
+          AND deleted = 0
+    </update>
+    <update id="archiveOldAppointments">
+        UPDATE course_appointment
+        SET deleted = 1
+        WHERE create_time &lt; #{before}
+          AND deleted = 0
+    </update>
+    <select id="listAppointmentsByDate" resultType="com.situ.futurestar.core.vo.CourseAppointmentVO">
+        SELECT
+            a.id, a.user_id, a.package_id, a.slot_id, a.status, a.report_url, a.create_time,
+            p.name AS package_name, p.coach_name,
+            s.course_date, s.time_range
+        FROM course_appointment a
+                 LEFT JOIN course_package p ON p.id = a.package_id
+                 LEFT JOIN course_slot     s ON s.id = a.slot_id
+        WHERE s.course_date = #{date}
+          AND a.status IN ('PENDING', 'CONFIRMED')
+          AND a.deleted = 0
+    </select>
 </mapper>

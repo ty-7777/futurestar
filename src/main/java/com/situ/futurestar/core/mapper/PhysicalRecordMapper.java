@@ -5,6 +5,7 @@ import com.situ.futurestar.core.entity.PhysicalRecord;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Mapper
@@ -13,4 +14,7 @@ public interface PhysicalRecordMapper {
     List<PhysicalRecord> selectListByUserId(Long userId);
 
      List<PhysicalRecord> trend(@Param("userId") Long userId, @Param("months") int months);
+
+     // 按录入日期查记录（定时任务每日统计用）
+     List<PhysicalRecord> listByDate(LocalDate date);
 }

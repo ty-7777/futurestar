@@ -99,4 +99,24 @@
           AND a.deleted = 0
         ORDER BY a.create_time DESC
     </select>
+
+    <!-- ================= 定时任务 ================= -->
+    <update id="updateStatusToRegistering">
+        UPDATE match_event SET status = 'REGISTRATING'
+        WHERE status = 'DRAFT'
+          AND registration_start &lt;= #{now}
+          AND deleted = 0
+    </update>
+    <update id="updateStatusToInProgress">
+        UPDATE match_event SET status = 'IN_PROGRESS'
+        WHERE status = 'REGISTRATING'
+          AND activity_start &lt;= #{now}
+          AND deleted = 0
+    </update>
+    <update id="updateStatusToEnded">
+        UPDATE match_event SET status = 'ENDED'
+        WHERE status = 'IN_PROGRESS'
+          AND activity_end &lt;= #{now}
+          AND deleted = 0
+    </update>
 </mapper>

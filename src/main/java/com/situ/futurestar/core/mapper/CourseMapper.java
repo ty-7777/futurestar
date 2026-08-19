@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -22,7 +23,7 @@ public interface CourseMapper {
     CourseSlot selectBySlotId(Long id);
     List<CourseAppointmentVO> selectMyAppointment(@Param("userId") Long userId, @Param("status") String status);
 
-    void plusCurrentCount(Long slotId);
+    int plusCurrentCount(Long slotId);
     void createAppointment(@Param("userId") Long userId ,@Param("slotId") Long slotId, @Param("packageId") Long packageId);
 
     CourseAppointmentVO selectByAppointmentId(Long id);
@@ -52,4 +53,13 @@ public interface CourseMapper {
     int countSlotByDate(@Param("packageId") Long packageId, @Param("date") LocalDate date);
 
     int updateReportUrl(@Param("id") Long id, @Param("reportUrl") String reportUrl);
+
+    // ---------- 定时任务 ----------
+    int completeFinishedAppointments(LocalDate today);
+
+    int closeExpiredSlots(LocalDate today);
+
+    int archiveOldAppointments(LocalDateTime before);
+
+    List<CourseAppointmentVO> listAppointmentsByDate(LocalDate date);
 }

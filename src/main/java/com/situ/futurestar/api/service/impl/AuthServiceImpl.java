@@ -17,7 +17,9 @@ import com.situ.futurestar.core.vo.TokenVO;
 import com.situ.futurestar.core.vo.UserVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,6 +28,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -37,11 +42,35 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenMapper refreshTokenMapper;
     private final StringRedisTemplate stringRedisTemplate;
     private final  String  BLACK_LIST_TOKEN ="jwt:blacklist:";
+    private static final DefaultRedisScript<Long> RATE_LIMIT_SCRIPT;
+    static {
+        RATE_LIMIT_SCRIPT = new DefaultRedisScript<>();
+        RATE_LIMIT_SCRIPT.setLocation(new ClassPathResource("limit.lua"));
+        RATE_LIMIT_SCRIPT.setResultType(Long.class);
+    }
     @Override
     public Result<Void> sendCode(SendCodeDTO sendCodeDTO) {
         String phone = sendCodeDTO.getPhone();
         if(phone == null|| phone.isEmpty()){
             throw  new BizException("手机号不能为空");
+        }
+        //用Redis对发送验证码请求进行限流
+        //1.加载Lua脚本（静态代码块已经帮我们做了）
+        //2.准备参数
+        //KEYS传递是“stock：1”这种key，ARGV传的是扣减数量
+        String limitKey = "captcha:rate:" + phone;
+        List<String> keys = Arrays.asList(limitKey);
+        //3.执行脚本
+        Long executed = stringRedisTemplate.execute(RATE_LIMIT_SCRIPT, keys,
+                String.valueOf(60000),          // 窗口 60s
+                String.valueOf(3),              // 最多 3 次
+                String.valueOf(System.currentTimeMillis()));
+
+        //4.转换结果
+
+        if (executed != null && executed.intValue() == 0) {
+            //被限流
+            throw new BizException(ErrorCode.TOO_MANY_REQUESTS, "发送过于频繁，请稍后再试");
         }
         //TODO: 调用api给用户手机发送验证码
         SmsCode smsCode=new SmsCode();

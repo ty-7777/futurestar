@@ -6,6 +6,7 @@ import com.situ.futurestar.core.vo.EventRegistrationVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -37,4 +38,11 @@ public interface EventMapper {
     int deleteEvent(Long id);
 
     List<EventRegistrationVO> listRegistrations(@Param("eventId") Long eventId);
+
+    // ---------- 定时任务 ----------
+    int updateStatusToRegistering(LocalDateTime now);
+
+    int updateStatusToInProgress(LocalDateTime now);
+
+    int updateStatusToEnded(LocalDateTime now);
 }

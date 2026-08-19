@@ -15,7 +15,4 @@ public class AiConversationSessionVO {
 
     /** 会话名称 */
     private String sessionName;
-
-    /** 创建时间 */
-    private LocalDateTime createTime;
 }

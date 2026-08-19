@@ -5,6 +5,7 @@ import com.situ.futurestar.core.entity.SysConfig;
 import com.situ.futurestar.core.exception.BizException;
 import com.situ.futurestar.core.mapper.ConfigMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminConfigServiceImpl implements AdminConfigService {
     private final ConfigMapper configMapper;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Override
     public List<SysConfig> listAll() {
@@ -40,5 +42,6 @@ public class AdminConfigServiceImpl implements AdminConfigService {
         if (updated != 1) {
             throw new BizException("配置不存在");
         }
+        stringRedisTemplate.delete("ai:prompt:" + key);
     }
 }

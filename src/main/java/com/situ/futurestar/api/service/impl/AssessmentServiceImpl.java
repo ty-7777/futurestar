@@ -3,11 +3,10 @@ package com.situ.futurestar.api.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.situ.futurestar.api.service.AssessmentService;
+import com.situ.futurestar.api.service.PromptService;
 import com.situ.futurestar.core.common.ErrorCode;
 import com.situ.futurestar.core.dto.SubmitAssessmentDTO;
-import com.situ.futurestar.core.entity.AssessmentResult;
-import com.situ.futurestar.core.entity.Question;
-import com.situ.futurestar.core.entity.Questionnaire;
+import com.situ.futurestar.core.entity.*;
 import com.situ.futurestar.core.exception.BizException;
 import com.situ.futurestar.core.mapper.AssessmentMapper;
 import com.situ.futurestar.core.mapper.UserMapper;
@@ -15,6 +14,7 @@ import com.situ.futurestar.core.util.SecurityUtil;
 import com.situ.futurestar.core.vo.AssessmentResultVO;
 import com.situ.futurestar.core.vo.PageResult;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +29,8 @@ import java.util.List;
 public class AssessmentServiceImpl implements AssessmentService {
     private  final  AssessmentMapper assessmentMapper;
     private final UserMapper userMapper;
+    private final ChatClient chatClient;
+    private final PromptService promptService;
     @Override
     public List<Questionnaire> getList() {
         List<Questionnaire> list = assessmentMapper.getList();
@@ -51,10 +53,14 @@ public class AssessmentServiceImpl implements AssessmentService {
         }
         //获取用户id
         Long userId = SecurityUtil.getCurrentUserId();
-        //TODO：调用ai对评测结果生成评分和建议
+        //调用ai对评测结果生成评分和建议
+        AiAssessmentResult aiAssessmentResult = scoreAndSuggest(submitAssessmentDTO.getQuestionnaireId(), submitAssessmentDTO.getAnswers(), userId);
         AssessmentResult result =new AssessmentResult();
         BeanUtils.copyProperties(submitAssessmentDTO,result);
         result.setUserId(userId);
+        //把AI返回的结果封装到最后的评测结果中
+        result.setAiScore(aiAssessmentResult.getScore());
+        result.setAiSuggestion(aiAssessmentResult.getSuggestion());
         //把评测结果存入数据库
         assessmentMapper.saveAssessment(result);
         //每次评测要奖励用户积分20
@@ -64,6 +70,20 @@ public class AssessmentServiceImpl implements AssessmentService {
         vo.setId(result.getId());
         vo.setCreateTime(LocalDateTime.now());
         return vo;
+    }
+    //封装一个调用AI发送提示词的方法
+    private AiAssessmentResult scoreAndSuggest(Long questionnaireId, String answers, Long userId){
+        String prompt = promptService.get("ai_assessment_prompt");
+        List<Question> questions = assessmentMapper.getQuestions(questionnaireId);//根据问卷ID拿到问卷里所有的题目
+        User user = SecurityUtil.getCurrentUser();//拿到当前用户的用户基本信息，拼装到提示词中
+        //拼接用户基本信息相关提示词
+        String context = "用户：" + user.getHeight() + "cm/" + user.getWeight() + "kg，位置" + user.getPosition()
+                + "，球龄" + user.getExperienceYears() + "年\n题目与答案：" + answers;
+        return chatClient.prompt()
+                .system(prompt)
+                .user(context)
+                .call()
+                .entity(AiAssessmentResult.class);//结构化返回，SpringAI会让AI返回json格式数据封装到传入的实体类中
     }
 
     @Override

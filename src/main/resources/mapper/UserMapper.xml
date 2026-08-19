@@ -29,6 +29,7 @@
         SET points = points - #{points}
         WHERE id = #{userId}
         AND deleted = 0
+        AND points >= #{points}
     </update>
     <update id="updateById">
         UPDATE user

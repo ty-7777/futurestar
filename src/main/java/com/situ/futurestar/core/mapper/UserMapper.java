@@ -15,6 +15,6 @@ public interface UserMapper {
     void updatePassword(@Param("userId") Long userId, @Param("password") String password);
 
     void updatePoints(@Param("userId") Long userId,@Param("points") int points);
-    void decreasePoints(@Param("userId") Long userId,@Param("points") int points);
+    int decreasePoints(@Param("userId") Long userId,@Param("points") int points);
     int updateById(@Param("userId") Long userId, @Param("updateProfileDTO")UpdateProfileDTO updateProfileDTO);
 }

@@ -25,4 +25,10 @@
           AND recorded_at &gt;= DATE_SUB(NOW(),INTERVAL #{months} MONTH)
         ORDER BY recorded_at ASC
     </select>
+    <select id="listByDate" resultType="com.situ.futurestar.core.entity.PhysicalRecord">
+        SELECT * FROM physical_record
+        WHERE recorded_at &gt;= #{date}
+          AND recorded_at &lt; DATE_ADD(#{date}, INTERVAL 1 DAY)
+          AND deleted = 0
+    </select>
 </mapper>

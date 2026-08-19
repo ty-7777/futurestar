@@ -92,8 +92,8 @@ public class CourseServiceImpl implements CourseService {
         Long slotId = appointmentDTO.getSlotId();
         //查询当前时间段并判断是否满足预约条件
         CourseSlot courseSlot = courseMapper.selectBySlotId(slotId);
-        if(courseSlot.getDeleted()){
-            throw  new BizException("当前时间段的课程已被删除");
+        if(courseSlot==null || courseSlot.getDeleted()){
+            throw  new BizException("当前时间段的课程不存在或已被删除");
         }
         if(courseSlot.getMaxCount().equals(courseSlot.getCurrentCount())
         ||!courseSlot.getStatus().equals("AVAILABLE")){
@@ -106,16 +106,24 @@ public class CourseServiceImpl implements CourseService {
         }
         Long packageId = courseSlot.getPackageId();
         CoursePackage coursePackage = courseMapper.getPackageById(packageId);
+        if(coursePackage==null){
+            throw  new BizException("课程套餐不存在");
+        }
         Integer price = coursePackage.getPrice();
         if(points-price<0){
             throw new BizException(ErrorCode.CONFLICT, "用户积分不足,无法预约");
         }
         //走到这里说明具备预约资格
-        //原子扣减用户积分
         Long userId = currentUser.getId();
-        userMapper.decreasePoints(userId,price);
-        //原子增加时段预约人数(Where后一定要加上人数判断，未满再加一)
-        courseMapper.plusCurrentCount(slotId);
+        //原子扣减用户积分（SQL 带 points >= price 守卫，防止扣成负数）
+        int deducted = userMapper.decreasePoints(userId,price);
+        if(deducted!=1){
+            throw new BizException(ErrorCode.CONFLICT, "用户积分不足,无法预约");
+        }
+        //原子增加时段预约人数（并发抢最后一个名额时更新0行说明已满，抛异常回滚扣掉的积分）
+        if(courseMapper.plusCurrentCount(slotId)!=1){
+            throw new BizException(ErrorCode.CONFLICT, "手慢了，名额已被抢完");
+        }
         //创建预约记录
         courseMapper.createAppointment(userId,slotId,packageId);
         //TODO:预约成功，发送短信通知用户

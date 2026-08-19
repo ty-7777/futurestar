@@ -33,11 +33,14 @@ spring:
   #       待实现 AI 对话时：把 model.chat.enabled 改为 true，并填入真实的 DEEPSEEK_API_KEY。
   ai:
     openai:
-      api-key: ${DEEPSEEK_API_KEY:}
+      api-key: ${DEEPSEEK_API_KEY}
       base-url: https://api.deepseek.com
+      chat:
+        model: deepseek-v4-flash
+        temperature: 0.7
     model:
       chat:
-        enabled: false
+        enabled: true
       embedding:
         enabled: false
       image:

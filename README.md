@@ -10,8 +10,9 @@
 | 安全认证 | Spring Security + JWT（双 Token 认证） |
 | ORM | MyBatis + PageHelper 分页 |
 | 数据库 | MySQL 8.4 |
-| 缓存 | Redis 8.4（Token 黑名单） |
-| AI | Spring AI（DeepSeek / OpenAI 兼容） |
+| 缓存 | Redis 8.4（Token 黑名单、验证码限流） |
+| AI | Spring AI（DeepSeek / OpenAI 兼容，SSE 流式对话） |
+| 定时任务 | Spring @Scheduled |
 | 短信 | 阿里云短信 SDK |
 | 构建 | Maven、Lombok |
 
@@ -40,14 +41,16 @@ com.situ.futurestar
 
 ## 功能模块
 
-- **认证授权**：验证码、注册、登录、Token 刷新、登出、密码找回（JWT 双 Token）
-- **体能记录**：录入、历史分页查询、趋势分析（体重/BMI/30米冲刺）
-- **技术/体能评测**：问卷、题目、评测结果 + AI 评分建议
-- **AI 对话**：会话管理、流式对话（DeepSeek）
-- **课程预约**：套餐、时段、预约、报告
-- **赛事活动**：活动发布、报名、签到
-- **消息通知**：消息推送
+- **认证授权**：验证码（ZSet+Lua 限流）、注册、登录、Token 刷新、登出、密码找回（JWT 双 Token）
+- **体能记录**：录入（超标自动 AI 生成训练/饮食指导并推送提醒）、历史分页查询、趋势分析（体重/BMI/30米冲刺）
+- **技术/体能评测**：问卷、题目、评测结果 + AI 评分建议（评分落库）
+- **AI 对话**：会话管理、SSE 流式对话（DeepSeek，断线自动保存片段）
+- **课程预约**：套餐、时段（并发防超卖）、预约、取消、报告
+- **赛事活动**：活动发布、报名（防重复）、签到（防重复加分）
+- **消息通知**：系统/课程/体能提醒推送
 - **个人中心**：资料、积分、会员等级
+- **管理端**（要求 ADMIN 角色）：Dashboard 统计、球员管理、课程管理、评测管理、赛事管理、消息管理、系统配置
+- **定时任务**：赛事状态流转、预约状态同步、过期时段关闭、次日课程提醒、验证码/历史数据清理等
 
 ## 认证设计（JWT 双 Token）
 
@@ -78,13 +81,15 @@ mysql -u root -p < src/main/resources/sql/futurestar.sql
 
 - `spring.datasource.url/username/password`：数据库连接
 - `spring.data.redis.host/port`：Redis 连接
-- `jwt.secret`：JWT 签名密钥（生产环境务必修改）
-- `spring.ai.openai.api-key`：DeepSeek API Key（需开启 AI 对话时）
+- `jwt.secret`：JWT 签名密钥（支持 `JWT_SECRET` 环境变量覆盖，生产环境务必修改）
+- **`DEEPSEEK_API_KEY` 环境变量**：DeepSeek API Key，AI 对话 / 评测评分 / 训练指导功能依赖。本地可存于 `.env` 文件（已加入 `.gitignore`，**禁止提交**），启动前需让应用读到该变量
 - 阿里云短信参数：申请验证码模板后填写
 
 ### 4. 启动
 
 ```bash
+# 需要 AI 功能时先设置环境变量（Windows PowerShell：$env:DEEPSEEK_API_KEY="sk-..."）
+export DEEPSEEK_API_KEY=sk-...
 mvn spring-boot:run
 ```
 

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.situ.futurestar.core.mapper.AiConversationMessageMapper">
+    <delete id="deleteExpired">
+        DELETE FROM ai_conversation_message WHERE create_time &lt; #{before}
+    </delete>
+    <select id="loadHistory" resultType="com.situ.futurestar.core.entity.AiConversationMessage">
+        SELECT * FROM ai_conversation_message
+        WHERE session_id = #{sessionId}
+        AND deleted = 0
+        ORDER BY id DESC LIMIT 20
+    </select>
+    <insert id="insert">
+        INSERT INTO ai_conversation_message
+        (session_id, user_id, role, message)
+        VALUES (#{sessionId}, #{userId}, #{role}, #{message})
+    </insert>
+    <select id="listBySession" resultType="com.situ.futurestar.core.entity.AiConversationMessage">
+        SELECT id, role, message, create_time
+        FROM ai_conversation_message
+        WHERE session_id = #{sessionId}
+        AND deleted = 0
+        ORDER BY id ASC
+    </select>
+</mapper>

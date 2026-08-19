@@ -15,4 +15,7 @@
          INSERT INTO sms_code (phone, code, expire_time, used, create_time)
          VALUES (#{phone}, #{code}, #{expireTime}, 0, NOW())
      </insert>
+     <delete id="deleteExpired">
+         DELETE FROM sms_code WHERE expire_time &lt; #{now}
+     </delete>
 </mapper>
