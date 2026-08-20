@@ -3,8 +3,9 @@
 <mapper namespace="com.situ.futurestar.core.mapper.EventMapper">
      <select id="eventList" resultType="com.situ.futurestar.core.entity.MatchEvent">
          SELECT * FROM match_event
-         WHERE type = #{type}
-         AND  deleted = 0
+         WHERE deleted = 0
+         <if test="type != null and type != ''">AND type = #{type}</if>
+         <if test="keyword != null and keyword != ''">AND title LIKE CONCAT('%', #{keyword}, '%')</if>
      </select>
      <select id="selectById" resultType="com.situ.futurestar.core.entity.MatchEvent">
          SELECT * FROM match_event

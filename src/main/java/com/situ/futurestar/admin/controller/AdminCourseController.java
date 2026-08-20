@@ -89,6 +89,20 @@ public class AdminCourseController {
         return Result.success(adminCourseService.appointmentList(pageNum, pageSize, packageId, date, status));
     }
 
+    //确认预约（管理员审核通过）
+    @PutMapping("/appointments/{id}/confirm")
+    public Result<Void> confirmAppointment(@PathVariable("id") Long id) {
+        adminCourseService.confirmAppointment(id);
+        return Result.success();
+    }
+
+    //拒绝预约（管理员拒绝，退还积分并释放名额）
+    @PutMapping("/appointments/{id}/reject")
+    public Result<Void> rejectAppointment(@PathVariable("id") Long id) {
+        adminCourseService.rejectAppointment(id);
+        return Result.success();
+    }
+
     //上传报告
     @PostMapping("/appointments/{id}/report")
     public Result<String> uploadReport(@PathVariable("id") Long appointmentId,

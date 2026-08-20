@@ -70,19 +70,19 @@ const onSubmit = async () => {
   padding: 20px 24px;
   border-radius: 16px;
   border: none;
-  box-shadow: 0 8px 28px rgba(47, 124, 255, 0.12);
+  box-shadow: 0 8px 28px rgba(22, 163, 74, 0.12);
 }
 .login__brand {
   width: 56px;
   height: 56px;
   margin: 0 auto 12px;
   border-radius: 18px;
-  background: linear-gradient(135deg, #2f7cff, #46c3ff);
+  background: linear-gradient(135deg, #22c55e, #16a34a);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 28px;
-  box-shadow: 0 6px 18px rgba(47, 124, 255, 0.3);
+  box-shadow: 0 6px 18px rgba(22, 163, 74, 0.3);
 }
 .login__title {
   text-align: center;

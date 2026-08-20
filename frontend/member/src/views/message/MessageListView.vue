@@ -84,7 +84,7 @@ const openDetail = (id) => router.push(`/message/${id}`)
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #ee0a24;
+  background: #dc2626;
   margin-top: 6px;
   flex-shrink: 0;
 }

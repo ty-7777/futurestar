@@ -10,9 +10,12 @@ import java.util.List;
 public interface ChatService {
     AiConversationSessionVO session(CreateSessionDTO createSessionDTO);
 
-    List<AiConversationSessionVO> sessionList();
+    List<AiConversationSessionVO> sessionList(String type);
 
     Flux<String> streamMessage(Long sessionId, String content);
+
+    /** AI 智能客服：带 Function Calling 工具，用独立提示词 */
+    Flux<String> streamAssistant(Long sessionId, String content);
 
     List<AiConversationMessage> messages(Long sessionId);
 

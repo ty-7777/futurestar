@@ -129,7 +129,7 @@ const onSubmit = async () => {
 }
 .fq__no {
   font-weight: 600;
-  color: #2f7cff;
+  color: #16a34a;
 }
 .fq__content {
   font-size: 14px;
@@ -164,7 +164,7 @@ const onSubmit = async () => {
 .fill__score {
   font-size: 18px;
   font-weight: 600;
-  color: #ee0a24;
+  color: #15803d;
 }
 .fill__suggestion {
   margin: 14px 0 20px;

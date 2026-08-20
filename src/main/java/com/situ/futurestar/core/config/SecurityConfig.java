@@ -2,6 +2,7 @@ package com.situ.futurestar.core.config;
 
 
 import com.situ.futurestar.core.filter.JwtAuthenticationFilter;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +37,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())   // 无状态JWT，不需要CSRF
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // 不用Session
                 .authorizeHttpRequests(auth -> auth
+                        // SSE 流结束时的异步分发不重复鉴权（此时 SecurityContext 已丢失），否则 AccessDenied 会把连接中断
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/send-code",    // 注册/登录/发码 放行
                                 "/api/auth/refresh", "/api/auth/reset-password",
                                 "/report/**").permitAll()   // 报告PDF：浏览器直接下载需放行（URL含UUID，靠随机性保护）

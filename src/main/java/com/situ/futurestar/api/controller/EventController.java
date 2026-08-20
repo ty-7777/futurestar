@@ -18,9 +18,10 @@ public class EventController {
     public Result<PageResult<MatchEvent>> eventList(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(value = "type") String type
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String keyword
     ){
-        return Result.success(eventService.eventList(pageNum,pageSize,type));
+        return Result.success(eventService.eventList(pageNum,pageSize,type,keyword));
     }
     //查看活动详情
     @GetMapping("/{id}")

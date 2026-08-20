@@ -3,13 +3,14 @@
 <mapper namespace="com.situ.futurestar.core.mapper.AiSessionMapper">
      <insert id="createSession"  useGeneratedKeys="true" keyProperty="session.id">
           INSERT INTO ai_conversation_session
-          (user_id, session_name)
-          VALUES (#{userId}, #{session.sessionName})
+          (user_id, session_name, type)
+          VALUES (#{userId}, #{session.sessionName}, #{session.type})
      </insert>
      <select id="sessionList"  resultType="com.situ.futurestar.core.vo.AiConversationSessionVO">
           SELECT id , session_name, create_time
           FROM ai_conversation_session
           WHERE user_id = #{userId}
+          AND type = #{type}
           AND deleted = 0
           ORDER BY create_time desc
      </select>

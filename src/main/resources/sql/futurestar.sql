@@ -266,6 +266,7 @@ CREATE TABLE IF NOT EXISTS ai_conversation_session (
   id          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '会话ID',
   user_id     BIGINT       NOT NULL COMMENT '用户ID',
   session_name VARCHAR(100) DEFAULT NULL COMMENT '会话名称',
+  type        VARCHAR(20)  DEFAULT 'CHAT' COMMENT '会话类型:CHAT普通对话/ASSISTANT智能客服',
   create_time DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   update_time DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   deleted     TINYINT      DEFAULT 0 COMMENT '逻辑删除',
@@ -330,6 +331,7 @@ CREATE TABLE IF NOT EXISTS sys_config (
 -- 系统配置初始化
 INSERT INTO sys_config (config_key, config_value, description) VALUES
 ('ai_chat_system_prompt', '你是一位专业的足球青训顾问，请结合青少年球员的体能、身高、体型等数据，用易懂的语言提供训练与饮食建议。', 'AI对话系统提示词'),
+('ai_assistant_system_prompt', '你是一位足球青训智能客服，你可以通过工具帮助用户查询课程套餐和可约时段、预约/取消课程、查询赛事并报名。请先通过工具获取真实数据再回答，预约/取消/报名前必须与用户确认后再执行。', 'AI智能客服系统提示词'),
 ('ai_assessment_prompt', '你是一位专业足球青训教练，根据问卷答案对学员进行百分制评分并给出针对性建议。', 'AI评测提示词'),
 ('ai_guidance_training_prompt', '你是足球青训教练，根据学员体能数据和异常指标给出具体训练建议。', 'AI训练指导提示词'),
 ('ai_guidance_diet_prompt', '你是青少年运动营养师，根据学员体能数据和异常指标给出饮食建议。', 'AI饮食指导提示词'),

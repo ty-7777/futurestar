@@ -21,7 +21,7 @@ const buildOption = (metric, name, unit) => {
         smooth: true,
         data: points,
         areaStyle: { opacity: 0.15 },
-        itemStyle: { color: '#2f7cff' }
+        itemStyle: { color: '#16a34a' }
       }
     ]
   }

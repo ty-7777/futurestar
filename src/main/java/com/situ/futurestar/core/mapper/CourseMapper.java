@@ -15,7 +15,7 @@ import java.util.List;
 @Mapper
 public interface CourseMapper {
     // ---------- 会员端 ----------
-    List<CoursePackage> list();
+    List<CoursePackage> list(@Param("keyword") String keyword);
 
     CoursePackage getPackageById(Long id);
 
@@ -53,6 +53,12 @@ public interface CourseMapper {
     int countSlotByDate(@Param("packageId") Long packageId, @Param("date") LocalDate date);
 
     int updateReportUrl(@Param("id") Long id, @Param("reportUrl") String reportUrl);
+
+    //管理员确认预约（仅 PENDING 可确认，防重复处理）
+    int confirmAppointment(Long id);
+
+    //管理员拒绝预约（仅 PENDING 可拒绝，防重复处理）
+    int rejectAppointment(Long id);
 
     // ---------- 定时任务 ----------
     int completeFinishedAppointments(LocalDate today);

@@ -7,14 +7,14 @@
    - 间距：页面 20px 内边距，卡片 16-20px，区块间距 16px
    ===================================================================== */
 :root {
-  /* ---- 品牌主色（与会员端一致，仅作点缀） ---- */
-  --el-color-primary: #2f7cff;
-  --el-color-primary-light-3: #6da4ff;
-  --el-color-primary-light-5: #9cc2ff;
-  --el-color-primary-light-7: #c9dcff;
-  --el-color-primary-light-8: #e0ebff;
-  --el-color-primary-light-9: #f2f6ff;
-  --el-color-primary-dark-2: #1e5fd8;
+  /* ---- 品牌主色（与会员端一致，球场绿仅作点缀） ---- */
+  --el-color-primary: #16a34a;
+  --el-color-primary-light-3: #5cb57d;
+  --el-color-primary-light-5: #92cba8;
+  --el-color-primary-light-7: #c6e4d2;
+  --el-color-primary-light-8: #dcefe3;
+  --el-color-primary-light-9: #f0f8f3;
+  --el-color-primary-dark-2: #12813e;
 
   /* ---- 中性色 ---- */
   --el-text-color-primary: #1d2129;
@@ -79,7 +79,7 @@ body {
   --el-table-header-bg-color: #f8fafc;
   --el-table-header-text-color: #5b6470;
   --el-table-border-color: #f0f2f6;
-  --el-table-row-hover-bg-color: #f7faff;
+  --el-table-row-hover-bg-color: #f2faf5;
 }
 .el-table th.el-table__cell {
   font-weight: 600;

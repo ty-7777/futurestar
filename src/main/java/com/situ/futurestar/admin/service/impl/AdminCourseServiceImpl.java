@@ -10,11 +10,13 @@ import com.situ.futurestar.core.entity.CoursePackage;
 import com.situ.futurestar.core.entity.CourseSlot;
 import com.situ.futurestar.core.exception.BizException;
 import com.situ.futurestar.core.mapper.CourseMapper;
+import com.situ.futurestar.core.mapper.UserMapper;
 import com.situ.futurestar.core.vo.CourseAppointmentVO;
 import com.situ.futurestar.core.vo.PageResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -33,6 +35,7 @@ public class AdminCourseServiceImpl implements AdminCourseService {
     private static final long MAX_REPORT_SIZE = 20L * 1024 * 1024; // 20MB
 
     private final CourseMapper courseMapper;
+    private final UserMapper userMapper;
 
     @Override
     public PageResult<CoursePackage> packageList(int pageNum, int pageSize) {
@@ -149,6 +152,37 @@ public class AdminCourseServiceImpl implements AdminCourseService {
         result.setPages(pageInfo.getPages());
         result.setList(list);
         return result;
+    }
+
+    @Override
+    @Transactional
+    public void confirmAppointment(Long id) {
+        if (id == null || id < 0) {
+            throw new BizException("预约id不合法");
+        }
+        //状态守卫在 SQL 里：仅 PENDING 可确认，重复确认返回 0 行
+        if (courseMapper.confirmAppointment(id) != 1) {
+            throw new BizException("预约不存在或已被处理");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void rejectAppointment(Long id) {
+        if (id == null || id < 0) {
+            throw new BizException("预约id不合法");
+        }
+        CourseAppointmentVO vo = courseMapper.selectByAppointmentId(id);
+        if (vo == null) {
+            throw new BizException("预约不存在");
+        }
+        //状态守卫在 SQL 里：仅 PENDING 可拒绝，防重复处理
+        if (courseMapper.rejectAppointment(id) != 1) {
+            throw new BizException("预约不存在或已被处理");
+        }
+        //拒绝预约与用户取消同逻辑：退还积分 + 释放时段名额
+        userMapper.updatePoints(vo.getUserId(), vo.getPrice());
+        courseMapper.decreaseCurrentCount(id);
     }
 
     @Override

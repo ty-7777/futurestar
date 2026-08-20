@@ -10,11 +10,11 @@ const router = useRouter()
 const stats = ref(null)
 
 const cards = [
-  { key: 'playerTotal', label: '球员总数', icon: 'User', color: '#2f7cff', bg: '#eaf2ff' },
-  { key: 'todayNewPlayers', label: '今日新增球员', icon: 'UserFilled', color: '#16b8cf', bg: '#e5f9fb' },
-  { key: 'todayCourseAppointments', label: '今日课程预约', icon: 'Notebook', color: '#2eb35c', bg: '#e8f8ee' },
-  { key: 'todayEventRegistrations', label: '今日赛事报名', icon: 'Trophy', color: '#f08a24', bg: '#fff3e5' },
-  { key: 'pendingAppointments', label: '待确认预约', icon: 'AlarmClock', color: '#ee0a24', bg: '#fdecee' }
+  { key: 'playerTotal', label: '球员总数', icon: 'User', color: '#16a34a', bg: '#eafaf0' },
+  { key: 'todayNewPlayers', label: '今日新增球员', icon: 'UserFilled', color: '#22c55e', bg: '#f0fbf4' },
+  { key: 'todayCourseAppointments', label: '今日课程预约', icon: 'Notebook', color: '#15803d', bg: '#e6f6ec' },
+  { key: 'todayEventRegistrations', label: '今日赛事报名', icon: 'Trophy', color: '#0b5d2e', bg: '#e9f8ef' },
+  { key: 'pendingAppointments', label: '待确认预约', icon: 'AlarmClock', color: '#dc2626', bg: '#fdecee' }
 ]
 
 // 快捷入口

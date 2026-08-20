@@ -26,15 +26,12 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final UserMapper userMapper;
     @Override
-    public PageResult<MatchEvent> eventList(int pageNum, int pageSize, String type) {
+    public PageResult<MatchEvent> eventList(int pageNum, int pageSize, String type, String keyword) {
         if(pageNum<0||pageSize<=0){
             throw  new BizException("分页参数不合法");
         }
-        if(type==null||type.isBlank()){
-            throw new BizException("类型不合法");
-        }
         PageHelper.startPage(pageNum,pageSize);
-        List<MatchEvent> list = eventMapper.eventList(type);
+        List<MatchEvent> list = eventMapper.eventList(type, keyword);
         PageInfo<MatchEvent> pageInfo = new PageInfo<>(list);
         PageResult<MatchEvent> result =new PageResult<>();
         if(list.isEmpty()){
@@ -68,6 +65,12 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public void signUp(Long eventId) {
+        signUp(eventId, SecurityUtil.getCurrentUser());
+    }
+
+    @Override
+    @Transactional
+    public void signUp(Long eventId, User user) {
         if(eventId==null||eventId<0){
             throw new BizException("活动id不合法");
         }
@@ -85,7 +88,7 @@ public class EventServiceImpl implements EventService {
         }
         //走到这里说明满足报名条件
         //获取当前用户id
-        Long userId = SecurityUtil.getCurrentUserId();
+        Long userId = user.getId();
         //新建报名活动表
         EventRegistration registration =new EventRegistration();
         registration.setEventId(eventId);
@@ -100,11 +103,16 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public PageResult<MatchEvent> myEvent(int pageNum, int pageSize) {
+        return myEvent(pageNum, pageSize, SecurityUtil.getCurrentUser());
+    }
+
+    @Override
+    public PageResult<MatchEvent> myEvent(int pageNum, int pageSize, User user) {
         if(pageNum<0||pageSize<=0){
             throw  new BizException("分页参数不合法");
         }
         //获取当前用户id
-        Long userId = SecurityUtil.getCurrentUserId();
+        Long userId = user.getId();
         PageHelper.startPage(pageNum,pageSize);
         List<MatchEvent> list = eventMapper.myEvent(userId);
         PageInfo<MatchEvent> pageInfo =new PageInfo<>(list);

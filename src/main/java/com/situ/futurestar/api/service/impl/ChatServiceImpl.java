@@ -2,9 +2,12 @@ package com.situ.futurestar.api.service.impl;
 
 import com.situ.futurestar.api.service.ChatService;
 import com.situ.futurestar.api.service.PromptService;
+import com.situ.futurestar.api.tools.CourseTools;
+import com.situ.futurestar.api.tools.EventTools;
 import com.situ.futurestar.core.dto.CreateSessionDTO;
 import com.situ.futurestar.core.entity.AiConversationMessage;
 import com.situ.futurestar.core.entity.AiConversationSession;
+import com.situ.futurestar.core.entity.User;
 import com.situ.futurestar.core.exception.BizException;
 import com.situ.futurestar.core.mapper.AiConversationMessageMapper;
 import com.situ.futurestar.core.mapper.AiSessionMapper;
@@ -17,8 +20,10 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -27,12 +32,16 @@ public class ChatServiceImpl implements ChatService {
     private final AiConversationMessageMapper aiConversationMessageMapper;
     private final ChatClient chatClient;
     private final PromptService promptService;
+    private final CourseTools courseTools;
+    private final EventTools eventTools;
+
     @Override
     public AiConversationSessionVO session(CreateSessionDTO createSessionDTO) {
         AiConversationSession session = new AiConversationSession();
         //获取当前用户id
         Long userId = SecurityUtil.getCurrentUserId();
         session.setSessionName(createSessionDTO.getSessionName());
+        session.setType(createSessionDTO.getType());
         session.setUserId(userId);
         aiSessionMapper.createSession(session,userId);
         AiConversationSessionVO vo =new AiConversationSessionVO();
@@ -42,16 +51,28 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public List<AiConversationSessionVO> sessionList() {
+    public List<AiConversationSessionVO> sessionList(String type) {
         //获取当前用户id
         Long userId = SecurityUtil.getCurrentUserId();
-        return aiSessionMapper.sessionList(userId);
+        return aiSessionMapper.sessionList(userId, type);
     }
 
     @Override
     public Flux<String> streamMessage(Long sessionId, String content) {
-        // ① 加载会话（本来就要做：校验归属）
-        Long userId = SecurityUtil.getCurrentUserId();
+        // 普通 AI 对话：纯聊天，不注册工具
+        return doStream(sessionId, content, "ai_chat_system_prompt", false);
+    }
+
+    @Override
+    public Flux<String> streamAssistant(Long sessionId, String content) {
+        // AI 智能客服：注册课程/赛事工具，用独立提示词
+        return doStream(sessionId, content, "ai_assistant_system_prompt", true);
+    }
+
+    private Flux<String> doStream(Long sessionId, String content, String promptKey, boolean withTools) {
+        // ① 加载会话（本来就要做：校验归属）；主线程取用户，异步工具线程无 SecurityContext
+        User user = SecurityUtil.getCurrentUser();
+        Long userId = user.getId();
         AiConversationSession session = aiSessionMapper.selectById(sessionId);
         if (session == null || !session.getUserId().equals(userId)) {
             throw new BizException("会话不存在或无权限");
@@ -64,22 +85,26 @@ public class ChatServiceImpl implements ChatService {
         }
         //先加载会话历史,让AI携带最近十轮的上下文
         List<AiConversationMessage> list = aiConversationMessageMapper.loadHistory(sessionId);
-        //把历史上下文反转成正序
-        List<Message> history = list.stream().map(
+        //把历史上下文反转成正序（Stream.toList() 返回不可变列表，reverse 会抛异常，需先包一层 ArrayList）
+        List<Message> history = new ArrayList<>(list.stream().map(
                 m -> (Message)("user".equals(m.getRole())
                         ? new UserMessage(m.getMessage())
                         : new AssistantMessage(m.getMessage()))
-        ).toList();
+        ).toList());
         Collections.reverse(history);
         //先把用户发的消息存入消息表
         saveMessage(sessionId,userId,"user",content);
         //建一个StringBuilder来存Ai回的消息
         StringBuilder sb =new StringBuilder();
-        return chatClient.prompt()
-                .system(promptService.get("ai_chat_system_prompt"))
+        ChatClient.ChatClientRequestSpec spec = chatClient.prompt()
+                .system(promptService.get(promptKey))
                 .messages(history)
-                .user(content)
-                .stream()
+                .user(content);
+        if (withTools) {
+            spec = spec.tools(courseTools, eventTools)
+                    .toolContext(Map.of(CourseTools.USER_KEY, user));
+        }
+        return spec.stream()
                 .content()
                 .doOnNext(sb::append)
                 .doOnComplete(()->saveMessage(sessionId,userId,"assistant",sb.toString()))

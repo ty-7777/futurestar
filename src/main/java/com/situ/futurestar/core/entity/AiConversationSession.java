@@ -20,6 +20,9 @@ public class AiConversationSession {
     /** 会话名称 */
     private String sessionName;
 
+    /** 会话类型：CHAT 普通对话 / ASSISTANT 智能客服 */
+    private String type;
+
     /** 创建时间 */
     private LocalDateTime createTime;
 

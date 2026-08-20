@@ -13,7 +13,7 @@ public interface AiSessionMapper {
     void createSession(@Param("session") AiConversationSession session , @Param("userId") Long userId);
     void setSessionName(@Param("sessionId") Long sessionId, @Param("sessionName") String sessionName);
 
-    List<AiConversationSessionVO> sessionList(Long userId);
+    List<AiConversationSessionVO> sessionList(@Param("userId") Long userId, @Param("type") String type);
 
     AiConversationSession selectById(Long sessionId);
 

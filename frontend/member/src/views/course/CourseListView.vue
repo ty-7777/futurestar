@@ -81,7 +81,7 @@ const onLoad = async () => {
   color: #323233;
 }
 .cp__price {
-  color: #ee0a24;
+  color: #15803d;
   font-weight: 600;
 }
 .cp__meta {

@@ -52,6 +52,6 @@ onMounted(async () => {
 .as__go {
   margin-top: 10px;
   font-size: 13px;
-  color: #2f7cff;
+  color: #16a34a;
 }
 </style>

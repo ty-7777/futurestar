@@ -23,6 +23,7 @@ export function streamSSE(url, body, { onMessage, signal } = {}) {
         const reader = res.body.getReader()
         const decoder = new TextDecoder()
         let buffer = ''
+        let finished = false // 收到 [DONE] 就结束，防止连接不关闭时永远等下去
 
         const handleBlock = (block) => {
           // 一个事件块内可能有多个 data: 行（多行文本），用 \n 拼接
@@ -32,9 +33,10 @@ export function streamSSE(url, body, { onMessage, signal } = {}) {
             .map((line) => line.slice(5).replace(/^ /, ''))
             .join('\n')
           if (data) onMessage && onMessage(data)
+          if (data.includes('[DONE]')) finished = true
         }
 
-        while (true) {
+        while (!finished) {
           const { done, value } = await reader.read()
           if (done) break
           buffer += decoder.decode(value, { stream: true }).replace(/\r/g, '')

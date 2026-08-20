@@ -15,6 +15,7 @@
 | 定时任务 | Spring @Scheduled |
 | 短信 | 阿里云短信 SDK |
 | 构建 | Maven、Lombok |
+| 前端 | Vue 3 + Vite，会员端 Vant 4（5173），管理端 Element Plus（5174），ECharts |
 
 ## 项目结构
 
@@ -45,7 +46,9 @@ com.situ.futurestar
 - **体能记录**：录入（超标自动 AI 生成训练/饮食指导并推送提醒）、历史分页查询、趋势分析（体重/BMI/30米冲刺）
 - **技术/体能评测**：问卷、题目、评测结果 + AI 评分建议（评分落库）
 - **AI 对话**：会话管理、SSE 流式对话（DeepSeek，断线自动保存片段）
-- **课程预约**：套餐、时段（并发防超卖）、预约、取消、报告
+- **AI 智能客服**：与 AI 对话分离的客服入口，Function Calling 让 AI 直接查询课程套餐/赛事活动
+- **课程预约**：套餐、时段（并发防超卖）、预约、取消、报告；**管理员审核**（确认/拒绝，拒绝自动退还积分并释放名额）
+- **首页搜索**：首页搜索框查询课程/赛事，结果展示在独立搜索页（支持返回、Tab 切换、触底分页）
 - **赛事活动**：活动发布、报名（防重复）、签到（防重复加分）
 - **消息通知**：系统/课程/体能提醒推送
 - **个人中心**：资料、积分、会员等级
@@ -94,6 +97,15 @@ mvn spring-boot:run
 ```
 
 默认端口 `8080`。接口前缀：`/api/auth`、`/api/member`、`/api/admin`，详细见 `src/main/resources/md/` 下的接口文档。
+
+### 5. 启动前端（可选）
+
+仓库内 `frontend/` 下为两个独立前端项目：
+
+```bash
+pnpm -C frontend/member dev   # 会员端（Vant4），http://localhost:5173
+pnpm -C frontend/admin dev    # 管理端（Element Plus），http://localhost:5174
+```
 
 ### 默认账号
 

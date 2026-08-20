@@ -30,5 +30,11 @@ public interface AdminCourseService {
 
     PageResult<CourseAppointmentVO> appointmentList(int pageNum, int pageSize, Long packageId, LocalDate date, String status);
 
+    //管理员确认预约
+    void confirmAppointment(Long id);
+
+    //管理员拒绝预约（退还积分、释放名额）
+    void rejectAppointment(Long id);
+
     String uploadReport(Long appointmentId, MultipartFile file);
 }

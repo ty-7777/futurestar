@@ -5,6 +5,9 @@
         SELECT * FROM course_package
         WHERE status = 'ENABLED'
         AND deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (name LIKE CONCAT('%', #{keyword}, '%') OR coach_name LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
     </select>
     <select id="getPackageById" resultType="com.situ.futurestar.core.entity.CoursePackage">
         SELECT * FROM course_package
@@ -151,6 +154,22 @@
         UPDATE course_appointment
         SET report_url = #{reportUrl}
         WHERE id = #{id} AND deleted = 0
+    </update>
+    <!-- 管理员确认预约（带状态守卫：仅 PENDING 可确认，防重复处理） -->
+    <update id="confirmAppointment">
+        UPDATE course_appointment
+        SET status = 'CONFIRMED'
+        WHERE id = #{id}
+          AND status = 'PENDING'
+          AND deleted = 0
+    </update>
+    <!-- 管理员拒绝预约（带状态守卫：仅 PENDING 可拒绝，防重复处理） -->
+    <update id="rejectAppointment">
+        UPDATE course_appointment
+        SET status = 'CANCELED'
+        WHERE id = #{id}
+          AND status = 'PENDING'
+          AND deleted = 0
     </update>
 
     <!-- ================= 定时任务 ================= -->

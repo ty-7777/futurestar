@@ -1,31 +1,31 @@
 /* =====================================================================
-   智星足球青训 · 设计系统 v2
-   设计原则：清爽 · 运动 · 质感
-   1. 配色：品牌蓝 #2f7cff + 青色渐变；功能色/中性色明确，保证对比度
+   智星足球青训 · 设计系统 v3（球场风）
+   设计原则：球场绿 · 黑 · 白
+   1. 配色：球场草绿 #16a34a + 亮绿渐变；功能色克制（黄/红仅作状态）
    2. 排版：16/14/12 三级字号；标题加粗+字距，正文 1.6 行高
    3. 间距：4px 基准刻度（4/8/12/16/24），页面统一 16px 侧边距
-   4. 组件：圆角 12(8/16) + 柔和蓝色阴影；按压微动效
+   4. 组件：圆角 12(8/16) + 柔和绿色阴影；按压微动效
    5. 动效：150-200ms ease；页面切换 fade-slide
    ===================================================================== */
 :root {
-  /* ---- 品牌色 ---- */
-  --fs-primary: #2f7cff;
-  --fs-primary-dark: #1e5fd8;
-  --fs-primary-light: #eaf2ff;
-  --fs-gradient: linear-gradient(135deg, #2f7cff 0%, #46c3ff 100%);
+  /* ---- 品牌色（球场草绿） ---- */
+  --fs-primary: #16a34a;
+  --fs-primary-dark: #15803d;
+  --fs-primary-light: #eafaf0;
+  --fs-gradient: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
 
   /* ---- 功能色 ---- */
-  --fs-success: #07c160;
-  --fs-warning: #ff976a;
-  --fs-danger: #ee0a24;
+  --fs-success: #16a34a;
+  --fs-warning: #fbbf24;
+  --fs-danger: #dc2626;
 
-  /* ---- 中性色 ---- */
-  --fs-bg: #f5f7fb;
+  /* ---- 中性色（黑/白/灰绿） ---- */
+  --fs-bg: #f3f8f4;
   --fs-card: #ffffff;
   --fs-text-1: #1d2129;
   --fs-text-2: #5b6470;
   --fs-text-3: #98a1b0;
-  --fs-border: #eef1f6;
+  --fs-border: #e8f1eb;
 
   /* ---- 间距（4px 基准）---- */
   --fs-space-1: 4px;
@@ -41,28 +41,28 @@
   --fs-radius-lg: 16px;
 
   /* ---- 阴影 ---- */
-  --fs-shadow: 0 2px 12px rgba(47, 124, 255, 0.06);
-  --fs-shadow-lg: 0 8px 28px rgba(47, 124, 255, 0.14);
+  --fs-shadow: 0 2px 12px rgba(22, 163, 74, 0.07);
+  --fs-shadow-lg: 0 8px 28px rgba(22, 163, 74, 0.15);
 
   /* ---- 动效 ---- */
   --fs-duration: 0.18s;
   --fs-easing: ease;
 
   /* ---- Vant 主题映射 ---- */
-  --van-primary-color: #2f7cff;
-  --van-success-color: #07c160;
-  --van-warning-color: #ff976a;
-  --van-danger-color: #ee0a24;
-  --van-background: #f5f7fb;
+  --van-primary-color: #16a34a;
+  --van-success-color: #16a34a;
+  --van-warning-color: #fbbf24;
+  --van-danger-color: #dc2626;
+  --van-background: #f3f8f4;
   --van-nav-bar-background: #ffffff;
   --van-nav-bar-icon-color: #1d2129;
-  --van-nav-bar-text-color: #2f7cff;
+  --van-nav-bar-text-color: #16a34a;
   --van-nav-bar-title-text-color: #1d2129;
   --van-tabbar-background: #ffffff;
-  --van-tabbar-item-active-color: #2f7cff;
-  --van-tabs-bottom-bar-color: #2f7cff;
-  --van-button-primary-background: #2f7cff;
-  --van-button-primary-border-color: #2f7cff;
+  --van-tabbar-item-active-color: #16a34a;
+  --van-tabs-bottom-bar-color: #16a34a;
+  --van-button-primary-background: #16a34a;
+  --van-button-primary-border-color: #16a34a;
   --van-field-label-color: #5b6470;
 }
 
@@ -150,10 +150,10 @@ body {
   transform: scale(0.98);
 }
 .van-button--primary.van-button--round:not(.van-button--plain):not(.van-button--disabled) {
-  box-shadow: 0 4px 14px rgba(47, 124, 255, 0.3);
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
 }
 .van-button--primary.van-button--disabled {
-  background: #c9d6f0;
+  background: #b7d8c4;
   border-color: transparent;
 }
 

@@ -160,7 +160,7 @@ const onBook = async (slot) => {
   font-weight: 600;
 }
 .pd__price {
-  color: #ee0a24;
+  color: #15803d;
   font-weight: 600;
 }
 .pd__meta {
@@ -198,9 +198,9 @@ const onBook = async (slot) => {
   border: 1px solid #eee;
 }
 .pd__date--active {
-  border-color: #2f7cff;
-  color: #2f7cff;
-  background: #ecf5ff;
+  border-color: #16a34a;
+  color: #16a34a;
+  background: #eafaf0;
 }
 .pd__date-label {
   font-size: 12px;

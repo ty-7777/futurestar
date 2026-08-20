@@ -34,12 +34,12 @@ public class CourseServiceImpl implements CourseService {
     private final CourseMapper courseMapper;
     private final UserMapper userMapper;
     @Override
-    public PageResult<CoursePackage> packagesList(int pageNum, int pageSize) {
+    public PageResult<CoursePackage> packagesList(int pageNum, int pageSize, String keyword) {
         if(pageNum<0||pageSize<=0){
             throw new BizException("分页参数不合法");
         }
         PageHelper.startPage(pageNum,pageSize);
-        List<CoursePackage> list = courseMapper.list();
+        List<CoursePackage> list = courseMapper.list(keyword);
         PageInfo<CoursePackage> pageInfo =new PageInfo<>(list);
         PageResult<CoursePackage> result =new PageResult<>();
         result.setPageNum(pageNum);
@@ -84,8 +84,14 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional
     public void submitAppointment(CreateAppointmentDTO appointmentDTO) {
+        submitAppointment(appointmentDTO, SecurityUtil.getCurrentUser());
+    }
+
+    @Override
+    @Transactional
+    public void submitAppointment(CreateAppointmentDTO appointmentDTO, User user) {
         //校验用户状态正常
-        User currentUser = SecurityUtil.getCurrentUser();
+        User currentUser = user;
         if(!"ENABLED".equals(currentUser.getStatus())){
             throw  new BizException("当前用户已被禁用，无法预约课程");
         }
@@ -131,13 +137,18 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public PageResult<CourseAppointmentVO> myAppointmentList(int pageNum, int pageSize, String status) {
+        return myAppointmentList(pageNum, pageSize, status, SecurityUtil.getCurrentUser());
+    }
+
+    @Override
+    public PageResult<CourseAppointmentVO> myAppointmentList(int pageNum, int pageSize, String status, User user) {
         if(pageNum<0||pageSize<=0){
             throw new BizException("分页参数不合法");
         }
         if(status.isBlank()){
             throw new BizException("状态名不合法");
         }
-        Long userId = SecurityUtil.getCurrentUserId();
+        Long userId = user.getId();
         PageHelper.startPage(pageNum,pageSize);
         List<CourseAppointmentVO> voList = courseMapper.selectMyAppointment(userId, status);
         PageInfo<CourseAppointmentVO> pageInfo =new PageInfo<>(voList);
@@ -183,8 +194,14 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional
     public void cancel(Long id) {
+        cancel(id, SecurityUtil.getCurrentUser());
+    }
+    
+    @Override
+    @Transactional
+    public void cancel(Long id, User user) {
         if(id==null||id<0){
-            throw  new BizException("预约id不合法");
+            throw new BizException("预约id不合法");
         }
         //检查预约状态是否可取消（未过期且未完成）
         CourseAppointmentVO courseAppointmentVO = courseMapper.selectByAppointmentId(id);
@@ -192,7 +209,7 @@ public class CourseServiceImpl implements CourseService {
             throw new BizException("该id的预约记录不存在");
         }
         //先检查是否是该用户的预约
-        Long userId = SecurityUtil.getCurrentUserId();
+        Long userId = user.getId();
         if (!Objects.equals(courseAppointmentVO.getUserId(), userId)) {
             throw  new BizException(ErrorCode.FORBIDDEN,"禁止取消其他用户的预约");
         }

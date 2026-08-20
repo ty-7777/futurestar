@@ -123,7 +123,7 @@ const viewReport = (a) => {
 }
 .ma__status {
   font-size: 12px;
-  color: #2f7cff;
+  color: #16a34a;
 }
 .ma__meta {
   margin-top: 6px;

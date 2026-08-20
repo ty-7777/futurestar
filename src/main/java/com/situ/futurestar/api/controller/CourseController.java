@@ -24,9 +24,10 @@ public class CourseController {
     @GetMapping("/packages")
     public Result<PageResult<CoursePackage>> packagesList(
             @RequestParam(defaultValue = "1") int pageNum,
-            @RequestParam(defaultValue = "10")int pageSize
+            @RequestParam(defaultValue = "10")int pageSize,
+            @RequestParam(required = false) String keyword
     ){
-        return Result.success(courseService.packagesList(pageNum,pageSize));
+        return Result.success(courseService.packagesList(pageNum,pageSize,keyword));
     }
     //根据套餐id获取套餐详情
     @GetMapping("/packages/{id}")

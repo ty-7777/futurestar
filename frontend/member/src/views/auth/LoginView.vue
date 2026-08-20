@@ -80,7 +80,7 @@ const onSubmit = async () => {
   padding: 0 24px;
 }
 .link {
-  color: #2f7cff;
+  color: #16a34a;
   font-size: 14px;
 }
 </style>

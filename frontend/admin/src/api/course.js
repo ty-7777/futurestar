@@ -33,6 +33,14 @@ export function getAdminAppointments(params) {
   return request.get('/admin/course/appointments', { params })
 }
 
+export function confirmAppointment(id) {
+  return request.put(`/admin/course/appointments/${id}/confirm`)
+}
+
+export function rejectAppointment(id) {
+  return request.put(`/admin/course/appointments/${id}/reject`)
+}
+
 export function uploadReport(id, file) {
   const form = new FormData()
   form.append('file', file)

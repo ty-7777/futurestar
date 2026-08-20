@@ -43,7 +43,7 @@ onMounted(async () => {
   font-weight: 600;
 }
 .rd__score span {
-  color: #ee0a24;
+  color: #15803d;
   font-size: 24px;
 }
 .rd__time {

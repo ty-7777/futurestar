@@ -16,6 +16,7 @@ const routes = [
     redirect: '/home',
     children: [
       { path: 'home', name: 'home', component: () => import('@/views/home/HomeView.vue'), meta: { title: '首页', tab: true } },
+      { path: 'search', name: 'search', component: () => import('@/views/search/SearchView.vue') },
       { path: 'course', name: 'course', component: () => import('@/views/course/CourseListView.vue'), meta: { title: '课程', tab: true } },
       { path: 'course/package/:id', name: 'course-detail', component: () => import('@/views/course/PackageDetailView.vue') },
       { path: 'course/appointments', name: 'course-appointments', component: () => import('@/views/course/MyAppointmentsView.vue') },
@@ -34,6 +35,8 @@ const routes = [
       { path: 'physical/trend', name: 'physical-trend', component: () => import('@/views/physical/TrendView.vue') },
       { path: 'chat', name: 'chat', component: () => import('@/views/chat/ChatListView.vue') },
       { path: 'chat/:id', name: 'chat-detail', component: () => import('@/views/chat/ChatView.vue') },
+      { path: 'assistant', name: 'assistant', component: () => import('@/views/assistant/AssistantListView.vue'), meta: { title: 'AI智能客服', tab: true } },
+      { path: 'assistant/:id', name: 'assistant-detail', component: () => import('@/views/assistant/AssistantView.vue') },
       { path: 'assessment', name: 'assessment', component: () => import('@/views/assessment/AssessmentListView.vue') },
       { path: 'assessment/:id', name: 'assessment-fill', component: () => import('@/views/assessment/AssessmentFillView.vue') },
       { path: 'assessment/history', name: 'assessment-history', component: () => import('@/views/assessment/AssessmentHistoryView.vue') },

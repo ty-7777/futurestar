@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper
 public interface EventMapper {
     // ---------- 会员端 ----------
-    List<MatchEvent> eventList(String type);
+    List<MatchEvent> eventList(@Param("type") String type, @Param("keyword") String keyword);
 
     MatchEvent selectById(Long id);
 

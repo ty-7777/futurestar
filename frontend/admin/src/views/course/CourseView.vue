@@ -10,6 +10,8 @@ import {
   getAdminSlots,
   updateSlot,
   getAdminAppointments,
+  confirmAppointment,
+  rejectAppointment,
   uploadReport
 } from '@/api/course'
 import { formatDate } from '@/utils/format'
@@ -161,9 +163,38 @@ const loadAppointments = async () => {
 }
 const APPOINT_STATUS = { PENDING: '待确认', CONFIRMED: '已确认', COMPLETED: '已完成', CANCELED: '已取消' }
 
+// 切换到对应 Tab 时才加载（预约管理列表默认不预加载）
+const onTabChange = (name) => {
+  if (name === 'appointments') loadAppointments()
+}
+
 const onUpload = async ({ file }, row) => {
   await uploadReport(row.id, file)
   ElMessage.success('报告已上传')
+  loadAppointments()
+}
+
+//确认预约（仅待确认状态显示按钮）
+const onConfirm = async (row) => {
+  try {
+    await ElMessageBox.confirm(`确定确认「${row.packageName} ${row.courseDate} ${row.timeRange}」的预约吗？`, '确认预约', { type: 'warning' })
+  } catch {
+    return
+  }
+  await confirmAppointment(row.id)
+  ElMessage.success('已确认')
+  loadAppointments()
+}
+
+//拒绝预约（退还学员积分并释放名额）
+const onReject = async (row) => {
+  try {
+    await ElMessageBox.confirm(`拒绝后将退还学员积分并释放名额，确定拒绝吗？`, '拒绝预约', { type: 'warning' })
+  } catch {
+    return
+  }
+  await rejectAppointment(row.id)
+  ElMessage.success('已拒绝')
   loadAppointments()
 }
 </script>
@@ -174,7 +205,7 @@ const onUpload = async ({ file }, row) => {
       <h2 class="page-title">课程管理</h2>
       <p class="page-sub">维护课程套餐、预约时段与训练报告</p>
     </div>
-    <el-tabs v-model="activeTab">
+    <el-tabs v-model="activeTab" @tab-change="onTabChange">
       <!-- 套餐管理 -->
       <el-tab-pane label="套餐管理" name="packages">
         <div class="fs-card table-card">
@@ -270,6 +301,14 @@ const onUpload = async ({ file }, row) => {
                 >
                   <el-button size="small" type="primary" plain>{{ row.reportUrl ? '重新上传' : '上传报告' }}</el-button>
                 </el-upload>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="150">
+              <template #default="{ row }">
+                <template v-if="row.status === 'PENDING'">
+                  <el-button size="small" type="success" @click="onConfirm(row)">确认</el-button>
+                  <el-button size="small" type="danger" plain @click="onReject(row)">拒绝</el-button>
+                </template>
               </template>
             </el-table-column>
           </el-table>

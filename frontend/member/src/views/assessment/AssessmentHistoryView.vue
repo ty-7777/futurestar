@@ -50,7 +50,7 @@ const onLoad = async () => {
 .ht__score {
   font-size: 18px;
   font-weight: 600;
-  color: #ee0a24;
+  color: #15803d;
 }
 .ht__time {
   margin-top: 4px;

@@ -122,9 +122,9 @@ const onLogout = async () => {
   color: #fff;
 }
 .admin-layout__menu .el-menu-item.is-active {
-  background: #2f7cff;
+  background: #16a34a;
   color: #fff;
-  box-shadow: 0 4px 14px rgba(47, 124, 255, 0.3);
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
 }
 .admin-layout__header {
   display: flex;

@@ -48,7 +48,7 @@ const send = async () => {
   let completed = false
   try {
     await streamSSE(
-      `/api/member/chat/session/${sessionId}/stream`,
+      `/api/member/chat/session/${sessionId}/assistant-stream`,
       { content },
       {
         onMessage: (chunk) => {
@@ -78,9 +78,9 @@ const send = async () => {
 
 <template>
   <div class="chat">
-    <van-nav-bar :title="route.query.name || 'AI 对话'" left-arrow @click-left="router.back()" />
+    <van-nav-bar :title="route.query.name || 'AI 智能客服'" left-arrow @click-left="router.back()" />
     <div ref="scrollEl" class="chat__body">
-      <van-empty v-if="!messages.length && !streamText" description="问点什么吧，训练、战术、营养都能聊" />
+      <van-empty v-if="!messages.length && !streamText" description="选课、约课、赛事报名，都能帮你办" />
       <div
         v-for="(m, i) in messages"
         :key="i"
@@ -96,7 +96,7 @@ const send = async () => {
       </div>
     </div>
     <div class="chat__input">
-      <van-field v-model="input" placeholder="输入你的问题…" @keyup.enter="send" />
+      <van-field v-model="input" placeholder="例如：帮我预约明天的课程…" @keyup.enter="send" />
       <van-button type="primary" :loading="sending" @click="send">发送</van-button>
     </div>
   </div>
