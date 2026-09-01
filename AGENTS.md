@@ -20,7 +20,7 @@
 | 后端 | Spring Boot 4.1、Java 21、Maven、Lombok |
 | 安全 | Spring Security + JWT（双 Token） |
 | ORM | MyBatis + PageHelper 分页（XML 在 `src/main/resources/mapper/`） |
-| 数据库 | MySQL 8.4（虚拟机 192.168.110.144，root/root） |
+| 数据库 | MySQL 8.4（虚拟机 192.168.71.128，root/root） |
 | 缓存 | Redis 8.4（Token 黑名单、验证码限流） |
 | AI | Spring AI + DeepSeek（SSE 流式对话、评测评分、训练指导） |
 | 定时任务 | Spring `@Scheduled`（8 个，见 `core/config/ScheduledTasks.java`） |
@@ -98,7 +98,7 @@ pnpm -C frontend/admin dev    # 管理端 5174
 ## 数据库与网络
 
 - **所有对外网络访问走宿主机代理** `http://127.0.0.1:7897`（Maven 下载、GitHub push、pnpm 装依赖都要）。
-- **MySQL + Redis 在虚拟机 `192.168.110.144`**（root/root，连接配置见 `application.yml`）。本地有一个 MySQL MCP 工具可直连 futurestar 库做查询/插入测试。
+- **MySQL + Redis 在虚拟机 `192.168.71.128`**（root/root，连接配置见 `application.yml`）。本地有一个 MySQL MCP 工具可直连 futurestar 库做查询/插入测试。
 - MySQL 时区已修好为 `system_time_zone=CST`，`NOW()` 与东八区一致（曾因 UTC 错 8 小时导致验证码过期判断出错）。
 
 ## 测试账号与数据
