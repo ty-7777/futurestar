@@ -2,6 +2,7 @@ package com.situ.futurestar.api.controller;
 
 
 import com.situ.futurestar.api.service.AssessmentService;
+import com.situ.futurestar.core.common.Log;
 import com.situ.futurestar.core.common.Result;
 import com.situ.futurestar.core.dto.SubmitAssessmentDTO;
 import com.situ.futurestar.core.entity.Question;
@@ -17,7 +18,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/member/assessment")
-public class AssessmentController {
+public class  AssessmentController {
     private final AssessmentService assessmentService;
 
     //获取问卷列表
@@ -31,6 +32,7 @@ public class AssessmentController {
         return Result.success(assessmentService.getQuestions(id));
     }
     //用户答完题后提交评测结果
+    @Log("提交评测")
     @PostMapping()
     public Result<AssessmentResultVO> submit(@Valid@RequestBody SubmitAssessmentDTO submitAssessmentDTO){
         return Result.success(assessmentService.submit(submitAssessmentDTO));

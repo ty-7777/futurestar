@@ -61,7 +61,7 @@
 
 ## 关键实现与约定（新 AI 改代码前必读）
 
-1. **JWT 双 Token**：Access Token 2 小时（无状态，`Authorization: Bearer`），Refresh Token 7 天（存库）。登出时 Access Token 进 Redis 黑名单、Refresh 删库。找回密码删除该用户全部 Refresh Token。
+1. **JWT 双 Token**：Access Token 2 小时（无状态，`Authorization: Bearer`），Refresh Token 7 天（存库）。刷新时**轮换**：旧 Refresh Token 删除、生成新 Token 落库返回（`refresh` 方法有 `@Transactional`）。登出时 Access Token 进 Redis 黑名单、Refresh 删库。找回密码删除该用户全部 Refresh Token。
 2. **限流**：验证码接口用 Redis ZSet + Lua（`limit.lua`）限流。
 3. **当前登录用户**：用 `SecurityUtil.getCurrentUserId()`（static 封装 SecurityContextHolder），不要用 `@AuthenticationPrincipal` 传参。
 4. **统一返回**：`Result<T>` + `ErrorCode`；业务异常抛 `BizException`，全局处理器兜底（密码错误返回 401「手机号或密码错误」，不要让它变 500）。
@@ -118,7 +118,7 @@ pnpm -C frontend/admin dev    # 管理端 5174
 - 清理过期积分未做（需先建 points_log 流水表）；`PromptService` 可加 Redis 缓存（可选）。
 - 训练指导去重按 type+日期，未精确到指标（需加 `trigger_indicator` 列）。
 - 多处多步写库未加 `@Transactional`（register / resetPassword / 管理端批量写入）。
-- refresh 无 Token 轮换（返回同一个，可用）；评测可反复刷积分（用户决定不改）。
+- 评测可反复刷积分（用户决定不改）。
 - 前端 Phase4 待办：全流程浏览器走查、移动端真机适配、边界提示打磨。
 
 ## ⚠️ 易踩坑

@@ -32,4 +32,13 @@
           AND user_id = #{userId}
           AND deleted = 0
      </update>
+     <update id="updateSummary">
+          UPDATE ai_conversation_session
+          SET summary = #{summary},
+              summarized_msg_id = #{summarizedMsgId}
+          WHERE id = #{sessionId}
+          AND deleted = 0
+          AND (summarized_msg_id = #{oldSummarizedMsgId}
+               OR (summarized_msg_id IS NULL AND #{oldSummarizedMsgId} = 0))
+     </update>
 </mapper>

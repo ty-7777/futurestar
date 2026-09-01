@@ -8,5 +8,6 @@ public interface RefreshTokenMapper {
     int save (RefreshToken refreshToken);
 
     RefreshToken selectByToken(String refreshToken);
+    void deleteByToken(String refreshToken);
     void deleteByUserId(Long userId);
 }

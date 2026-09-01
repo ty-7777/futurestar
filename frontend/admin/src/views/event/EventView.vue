@@ -160,16 +160,16 @@ const openRegs = async (row) => {
         <el-form-item label="封面URL"><el-input v-model="form.coverUrl" /></el-form-item>
         <el-form-item label="内容"><el-input v-model="form.content" type="textarea" :rows="3" /></el-form-item>
         <el-form-item label="报名开始">
-          <el-date-picker v-model="form.registrationStart" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
+          <el-date-picker v-model="form.registrationStart" type="datetime" value-format="YYYY-MM-DDTHH:mm:ss" style="width: 100%" />
         </el-form-item>
         <el-form-item label="报名截止">
-          <el-date-picker v-model="form.registrationEnd" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
+          <el-date-picker v-model="form.registrationEnd" type="datetime" value-format="YYYY-MM-DDTHH:mm:ss" style="width: 100%" />
         </el-form-item>
         <el-form-item label="活动开始">
-          <el-date-picker v-model="form.activityStart" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
+          <el-date-picker v-model="form.activityStart" type="datetime" value-format="YYYY-MM-DDTHH:mm:ss" style="width: 100%" />
         </el-form-item>
         <el-form-item label="活动结束">
-          <el-date-picker v-model="form.activityEnd" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
+          <el-date-picker v-model="form.activityEnd" type="datetime" value-format="YYYY-MM-DDTHH:mm:ss" style="width: 100%" />
         </el-form-item>
         <el-form-item label="人数上限"><el-input-number v-model="form.maxParticipants" :min="1" /></el-form-item>
         <el-form-item label="状态">

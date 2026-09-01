@@ -12,7 +12,7 @@ spring:
 
   # ---------------- 数据库（MySQL，本地可用 8.4/9.x） ----------------
   datasource:
-    url: jdbc:mysql://192.168.110.144/futurestar?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://192.168.71.128/futurestar?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -23,7 +23,7 @@ spring:
   # ---------------- Redis ----------------
   data:
     redis:
-      host: 192.168.110.144
+      host: 192.168.71.128
       port: 6379
       database: 0
       timeout: 5000ms
@@ -71,7 +71,7 @@ pagehelper:
 # ---------------- JWT ----------------
 jwt:
   secret: ${JWT_SECRET:futurestar-jwt-secret-please-change-this-in-production-2026}
-  access-token-expire: 7200        # Access Token 有效期（秒），2 小时
+  access-token-expire: 1800        # Access Token 有效期（秒），半小时
   refresh-token-expire: 604800     # Refresh Token 有效期（秒），7 天
 
 # ---------------- 阿里云短信 ----------------
@@ -79,4 +79,8 @@ jwt:
     # 验证码模板 Code（在阿里云短信控制台申请后填入）
 
 # ---------------- 文件上传路径 ----------------
-
+oss:
+  endpoint: oss-cn-qingdao.aliyuncs.com     # 按你的地域改
+  bucket: futurestar1
+  access-key-id: ${OSS_ACCESS_KEY_ID}
+  access-key-secret: ${OSS_ACCESS_KEY_SECRET}

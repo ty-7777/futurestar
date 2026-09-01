@@ -50,9 +50,17 @@
     </update>
     <insert id="createAppointment">
         INSERT INTO course_appointment
-        ( user_id, slot_id, package_id)
-        VALUES (#{userId}, #{slotId}, #{packageId})
+        ( user_id, slot_id, package_id, active_key)
+        VALUES (#{userId}, #{slotId}, #{packageId}, 1)
     </insert>
+    <!-- 防重复预约预检查：同一用户对同一时段是否已有有效（未取消）预约 -->
+    <select id="countActiveByUserSlot" resultType="int">
+        SELECT COUNT(*) FROM course_appointment
+        WHERE user_id = #{userId}
+          AND slot_id = #{slotId}
+          AND status != 'CANCELED'
+          AND deleted = 0
+    </select>
     <select id="selectByAppointmentId" resultType="com.situ.futurestar.core.vo.CourseAppointmentVO">
         SELECT
             a.id, a.user_id, a.package_id, a.slot_id, a.status, a.report_url, a.create_time,
@@ -66,7 +74,8 @@
     </select>
     <update id="updateAppointmentStatus">
         UPDATE course_appointment
-        SET status = 'CANCELED'
+        SET status = 'CANCELED',
+            active_key = NULL
         WHERE id = #{id}
         AND status IN ('PENDING', 'CONFIRMED')
         AND deleted = 0
@@ -166,7 +175,8 @@
     <!-- 管理员拒绝预约（带状态守卫：仅 PENDING 可拒绝，防重复处理） -->
     <update id="rejectAppointment">
         UPDATE course_appointment
-        SET status = 'CANCELED'
+        SET status = 'CANCELED',
+            active_key = NULL
         WHERE id = #{id}
           AND status = 'PENDING'
           AND deleted = 0

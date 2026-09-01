@@ -25,6 +25,7 @@ public interface CourseMapper {
 
     int plusCurrentCount(Long slotId);
     void createAppointment(@Param("userId") Long userId ,@Param("slotId") Long slotId, @Param("packageId") Long packageId);
+    int countActiveByUserSlot(@Param("userId") Long userId, @Param("slotId") Long slotId);
 
     CourseAppointmentVO selectByAppointmentId(Long id);
     int updateAppointmentStatus(Long id);

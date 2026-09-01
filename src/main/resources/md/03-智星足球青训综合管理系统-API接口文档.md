@@ -140,7 +140,7 @@
 |------|------|------|------|
 | refreshToken | string | 是 | 刷新令牌 |
 
-- 成功响应：`data: { accessToken, refreshToken }`
+- 成功响应：`data: { accessToken, refreshToken }`（**Refresh Token 轮换**：返回全新 Refresh Token，旧 Token 立即作废并删除，前端需全量覆盖本地存储）
 
 #### 2.1.5 登出
 - **POST** `/api/auth/logout`
@@ -308,7 +308,7 @@
 | content | string | 是 | 用户消息 |
 
 - 响应：`text/event-stream`（SSE 流式），逐字推送，最后推送 `[DONE]`
-- AI 自动携带最近 10 轮上下文
+- AI 自动携带最近 10 轮上下文；对话变长后，早期对话由后端在回复完成后异步压缩为摘要随上下文携带（对前端透明，无需额外接口）
 
 #### 2.4.4 对话历史
 - **GET** `/api/member/chat/session/{id}/messages`

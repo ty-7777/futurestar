@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/member/profile")
@@ -31,5 +33,10 @@ public class ProfileController {
     public Result<Void> changePassword(@Valid  @RequestBody ChangePasswordDTO changePasswordDTO){
         profileService.changePassword(changePasswordDTO);
         return Result.success();
+    }
+    //获取头像上传的OSS签名直传策略
+    @GetMapping("/oss-policy")
+    public Result<Map<String, String>> ossPolicy(){
+        return Result.success(profileService.getAvatarUploadPolicy());
     }
 }

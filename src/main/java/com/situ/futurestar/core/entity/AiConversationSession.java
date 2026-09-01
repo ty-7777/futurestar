@@ -23,6 +23,12 @@ public class AiConversationSession {
     /** 会话类型：CHAT 普通对话 / ASSISTANT 智能客服 */
     private String type;
 
+    /** 早期对话压缩摘要（滚动摘要，覆盖 summarizedMsgId 之前的消息） */
+    private String summary;
+
+    /** 已压缩到的消息ID（该 id 及之前的消息已被摘进 summary） */
+    private Long summarizedMsgId;
+
     /** 创建时间 */
     private LocalDateTime createTime;
 

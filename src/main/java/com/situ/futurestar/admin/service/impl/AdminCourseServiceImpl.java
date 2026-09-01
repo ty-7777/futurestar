@@ -110,7 +110,8 @@ public class AdminCourseServiceImpl implements AdminCourseService {
             CourseSlot slot = new CourseSlot();
             slot.setPackageId(packageId);
             slot.setCourseDate(d);
-            slot.setTimeRange(dto.getTimeRange());
+            //全角冒号/横线归一化：中文输入法输入的“18：00-19：00”会导致后续 LocalTime 解析失败
+            slot.setTimeRange(dto.getTimeRange().replace('：', ':').replace('－', '-'));
             slot.setMaxCount(dto.getMaxCount());
             slot.setCurrentCount(0);
             slot.setStatus("AVAILABLE");

@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { showToast } from 'vant'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { updateProfile } from '@/api/profile'
+import { updateProfile, getOssPolicy } from '@/api/profile'
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -49,6 +49,43 @@ const onBirthConfirm = ({ selectedValues }) => {
   const [y, m, d] = selectedValues
   form.value.birthDate = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
   showBirth.value = false
+}
+
+// ---- 头像上传（OSS 签名直传，文件不经过后端） ----
+const uploading = ref(false)
+
+const onAvatarRead = async ({ file }) => {
+  if (!file.type.startsWith('image/')) return showToast('请选择图片文件')
+  if (file.size > 2 * 1024 * 1024) return showToast('图片大小不能超过2MB')
+  uploading.value = true
+  try {
+    const { policy, signature, credential, dateTime, host, dir } = await getOssPolicy()
+    const dotIndex = file.name.lastIndexOf('.')
+    const ext = dotIndex > -1 ? file.name.slice(dotIndex).toLowerCase() : '.jpg'
+    const key = `${dir}${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`
+    const fd = new FormData()
+    fd.append('key', key)
+    fd.append('policy', policy)
+    // V4 签名：OSS 已对新 Bucket 禁用 V1（OSSAccessKeyId+signature 那一套）
+    fd.append('x-oss-signature-version', 'OSS4-HMAC-SHA256')
+    fd.append('x-oss-credential', credential)
+    fd.append('x-oss-date', dateTime)
+    fd.append('x-oss-signature', signature)
+    fd.append('success_action_status', '200') // 让 OSS 返回 200 而非默认 204，方便判断成功
+    fd.append('file', file)
+    const res = await fetch(host, { method: 'POST', body: fd })
+    if (!res.ok) {
+      const errText = await res.text()   // OSS 返回的 XML 里有真实错误码（SignatureDoesNotMatch/AccessDenied 等）
+      console.error('OSS上传失败:', res.status, errText)
+      throw new Error('OSS上传失败')
+    }
+    form.value.avatar = `${host}/${key}`
+    showToast('头像上传成功，记得点保存')
+  } catch {
+    showToast('头像上传失败，请重试')
+  } finally {
+    uploading.value = false
+  }
 }
 
 // ---- 保存 ----
@@ -124,7 +161,14 @@ const onSubmit = async () => {
         </van-field>
         <van-field v-model="form.experienceYears" label="球龄(年)" type="number" placeholder="请输入球龄" />
         <van-field v-model="form.emergencyContact" label="紧急联系人" type="tel" maxlength="11" placeholder="紧急联系电话" />
-        <van-field v-model="form.avatar" label="头像URL" placeholder="头像图片地址" />
+        <van-cell title="头像" center>
+          <template #value>
+            <van-uploader :after-read="onAvatarRead" accept="image/*" :disabled="uploading">
+              <img v-if="form.avatar" :src="form.avatar" class="edit-profile__avatar" alt="头像" />
+              <van-icon v-else name="plus" size="24" />
+            </van-uploader>
+          </template>
+        </van-cell>
       </van-cell-group>
       <div class="edit-profile__btn">
         <van-button type="primary" block round native-type="submit" :loading="saving">
@@ -149,5 +193,12 @@ const onSubmit = async () => {
 <style scoped>
 .edit-profile__btn {
   padding: 24px 16px;
+}
+.edit-profile__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
 </style>

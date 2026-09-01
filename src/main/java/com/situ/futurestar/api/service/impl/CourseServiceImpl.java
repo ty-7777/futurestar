@@ -18,6 +18,7 @@ import com.situ.futurestar.core.vo.CourseSlotVO;
 import com.situ.futurestar.core.vo.PageResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,6 +106,14 @@ public class CourseServiceImpl implements CourseService {
         ||!courseSlot.getStatus().equals("AVAILABLE")){
              throw new BizException(ErrorCode.CONFLICT,"当前时间段的课程预约人数已满");
         }
+        //课程已开始或日期已过的时段不允许预约（兼容全角冒号的历史数据）
+        LocalTime[] range = parseTimeRange(courseSlot.getTimeRange());
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+        if(courseSlot.getCourseDate().isBefore(today)
+                || (courseSlot.getCourseDate().isEqual(today) && !now.isBefore(range[0]))){
+            throw new BizException(ErrorCode.CONFLICT, "该课程已开始或已结束，无法预约");
+        }
         //校验用户积分是否充足
         Integer points = currentUser.getPoints();
         if(points<=0){
@@ -121,6 +130,10 @@ public class CourseServiceImpl implements CourseService {
         }
         //走到这里说明具备预约资格
         Long userId = currentUser.getId();
+        //防重复预约预检查：同一用户同一时段只能有一条有效预约（DB 唯一索引 uk_user_slot_active 兜底并发）
+        if(courseMapper.countActiveByUserSlot(userId, slotId) > 0){
+            throw new BizException("你已预约该时段，请勿重复预约");
+        }
         //原子扣减用户积分（SQL 带 points >= price 守卫，防止扣成负数）
         int deducted = userMapper.decreasePoints(userId,price);
         if(deducted!=1){
@@ -130,8 +143,12 @@ public class CourseServiceImpl implements CourseService {
         if(courseMapper.plusCurrentCount(slotId)!=1){
             throw new BizException(ErrorCode.CONFLICT, "手慢了，名额已被抢完");
         }
-        //创建预约记录
-        courseMapper.createAppointment(userId,slotId,packageId);
+        //创建预约记录（并发双请求可能同时通过预检查，由唯一索引兜底拦截；异常时事务自动回滚已扣积分/名额）
+        try {
+            courseMapper.createAppointment(userId,slotId,packageId);
+        } catch (DuplicateKeyException e) {
+            throw new BizException("你已预约该时段，请勿重复预约");
+        }
         //TODO:预约成功，发送短信通知用户
     }
 
@@ -221,15 +238,16 @@ public class CourseServiceImpl implements CourseService {
             throw new BizException("该预约已取消，请勿重复取消");
         }
 
-        //再检查时间，是不是在课程开始之后
+        //再检查时间：课程日期已过、或当天课程已经开始，都不允许取消
         LocalDate localDate = LocalDate.now();//获取当前日期，不含时分秒
         LocalTime localTime = LocalTime.now();//获取当前时分秒
-        String timeRange = courseAppointmentVO.getTimeRange();
         LocalDate courseDate = courseAppointmentVO.getCourseDate();
-        String[] split = timeRange.split("-");
-        LocalTime begin = LocalTime.parse(split[0]);
-        LocalTime end = LocalTime.parse(split[1]);
-        if(localDate.isAfter(courseDate)&&localTime.isAfter(end)){
+        LocalTime[] range = parseTimeRange(courseAppointmentVO.getTimeRange());
+        LocalTime begin = range[0];
+        LocalTime end = range[1];
+        boolean ended = courseDate.isBefore(localDate)
+                || (courseDate.isEqual(localDate) && localTime.isAfter(end));
+        if(ended){
             throw new BizException("课程已结束，无法取消预约");
         }
         if(localDate.isEqual(courseDate)&&localTime.isAfter(begin)&&localTime.isBefore(end)){
@@ -248,5 +266,12 @@ public class CourseServiceImpl implements CourseService {
         }
         // TODO:发送取消通知短信
 
+    }
+
+    /** 解析 "HH:mm-HH:mm"，兼容中文输入法产生的全角冒号/横线 */
+    private LocalTime[] parseTimeRange(String timeRange) {
+        String normalized = timeRange.replace('：', ':').replace('－', '-');
+        String[] split = normalized.split("-");
+        return new LocalTime[]{LocalTime.parse(split[0].trim()), LocalTime.parse(split[1].trim())};
     }
 }

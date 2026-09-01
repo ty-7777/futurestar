@@ -68,6 +68,12 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <!-- AOP（切面日志等；Spring Boot 4 已将 starter-aop 改名为 starter-aspectj） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
+        </dependency>
+
         <!-- Redis（Token 黑名单、短信验证码、缓存） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

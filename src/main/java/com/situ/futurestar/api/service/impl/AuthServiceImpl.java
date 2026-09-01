@@ -26,6 +26,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -159,20 +160,35 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional // 删旧+存新必须原子，防止并发下旧token被重复使用
     public Result<TokenVO> refresh(String refreshToken) {
         //1.校验refreshToken的有效性,查询数据库确认
         RefreshToken selected = refreshTokenMapper.selectByToken(refreshToken);
         if(selected==null){
+            // 尝试解析签名：解析成功说明是"被轮换过的旧 token"（重用）→ 撤销全部会话
+            //如果有旧的Token被重用，说明也有可能是"被窃取的旧 token"（泄露）→ 撤销全部会话
+            try {
+                Long leakedUserId = jwtUtil.parseUserId(refreshToken);
+                refreshTokenMapper.deleteByUserId(leakedUserId);  // 连黑客刚拿到的一起作废
+            } catch (Exception ignore) { }
             throw new BizException("refreshToken不存在");
         }
+        //2.删除旧refreshToken（Token轮换：用过即作废，缩短泄露窗口）
+        refreshTokenMapper.deleteByToken(refreshToken);
         Long userId = selected.getUserId();
         User user = userMapper.selectById(userId);
         String phone = user.getPhone();
-        //生成新的AccessToken
+        //3.生成新的AccessToken和RefreshToken
         String accessToken = jwtUtil.generateToken(userId, phone);
+        String newRefreshToken = jwtUtil.generateRefreshToken(userId, phone);
+        RefreshToken rfToken =new RefreshToken();
+        rfToken.setToken(newRefreshToken);
+        rfToken.setUserId(userId);
+        rfToken.setExpireTime(LocalDateTime.now().plusDays(7));
+        refreshTokenMapper.save(rfToken);
         TokenVO tokenVO =new TokenVO();
         tokenVO.setAccessToken(accessToken);
-        tokenVO.setRefreshToken(refreshToken);
+        tokenVO.setRefreshToken(newRefreshToken);
         return Result.success(tokenVO);
     }
 

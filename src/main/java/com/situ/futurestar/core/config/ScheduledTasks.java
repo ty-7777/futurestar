@@ -135,17 +135,4 @@ public class ScheduledTasks {
         }
     }
 
-    /** 8. 体能每日统计：汇总昨日体能录入数据（每天0:30） */
-    @Scheduled(cron = "0 30 0 * * ?")
-    public void dailyPhysicalStat() {
-        try {
-            LocalDate yesterday = LocalDate.now().minusDays(1);
-            List<PhysicalRecord> list = physicalRecordMapper.listByDate(yesterday);
-            double avgBmi = list.stream().mapToDouble(PhysicalRecord::getBmi).average().orElse(0);
-            double avgWeight = list.stream().mapToDouble(PhysicalRecord::getWeight).average().orElse(0);
-            log.info("定时任务：昨日({})体能录入 {} 条，平均BMI={}，平均体重={}kg", yesterday, list.size(), avgBmi, avgWeight);
-        } catch (Exception e) {
-            log.error("定时任务[体能每日统计]执行失败", e);
-        }
-    }
 }

@@ -3,6 +3,7 @@ package com.situ.futurestar.api.controller;
 
 import com.situ.futurestar.api.service.AuthService;
 import com.situ.futurestar.core.common.ErrorCode;
+import com.situ.futurestar.core.common.Log;
 import com.situ.futurestar.core.common.Result;
 import com.situ.futurestar.core.dto.*;
 import com.situ.futurestar.core.entity.PhysicalRecord;
@@ -35,6 +36,7 @@ public class AuthController {
         return authService.register(registerDTO);
     }
     //登录
+    @Log("用户登录")
     @PostMapping("/login")
     public Result<LoginVO> login(@Valid@RequestBody LoginDTO loginDTO){
         return authService.login(loginDTO);

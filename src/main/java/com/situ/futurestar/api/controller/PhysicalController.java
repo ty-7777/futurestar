@@ -1,6 +1,7 @@
 package com.situ.futurestar.api.controller;
 
 import com.situ.futurestar.api.service.PhysicalService;
+import com.situ.futurestar.core.common.Log;
 import com.situ.futurestar.core.common.Result;
 import com.situ.futurestar.core.dto.PhysicalRecordDTO;
 import com.situ.futurestar.core.entity.PhysicalRecord;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class PhysicalController {
     private final  PhysicalService physicalService;
     //录入体能记录
+    @Log("录入体能记录")
     @PostMapping
     public Result<Void> recordPhysical(@Valid  @RequestBody PhysicalRecordDTO physicalRecordDTO){
         physicalService.recordPhysical(physicalRecordDTO);

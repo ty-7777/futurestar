@@ -2,6 +2,7 @@ package com.situ.futurestar.api.controller;
 
 
 import com.situ.futurestar.api.service.CourseService;
+import com.situ.futurestar.core.common.Log;
 import com.situ.futurestar.core.common.Result;
 import com.situ.futurestar.core.dto.CreateAppointmentDTO;
 import com.situ.futurestar.core.entity.CoursePackage;
@@ -45,6 +46,7 @@ public class CourseController {
         return Result.success(courseService.getSlots(id,date));
     }
     //提交预约
+    @Log("提交课程预约")
     @PostMapping("/appointment")
     public Result<Void> submitAppointment(@Valid @RequestBody CreateAppointmentDTO appointmentDTO){
         courseService.submitAppointment(appointmentDTO);
@@ -65,6 +67,7 @@ public class CourseController {
         return Result.success(courseService.report(id));
     }
     //取消预约
+    @Log("取消课程预约")
     @PostMapping("/appointment/{id}/cancel")
     public Result<Void> cancel(@PathVariable("id") Long id){
         courseService.cancel(id);

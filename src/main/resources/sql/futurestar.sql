@@ -197,10 +197,12 @@ CREATE TABLE IF NOT EXISTS course_appointment (
   create_time DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   update_time DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   deleted     TINYINT      DEFAULT 0 COMMENT '逻辑删除',
+  active_key  TINYINT      DEFAULT NULL COMMENT '防重复预约哨兵:1=有效,NULL=已取消(配合唯一索引uk_user_slot_active实现"仅有效记录唯一")',
   PRIMARY KEY (id),
   KEY idx_user_id (user_id),
   KEY idx_slot_id (slot_id),
-  KEY idx_status (status)
+  KEY idx_status (status),
+  UNIQUE KEY uk_user_slot_active (user_id, slot_id, active_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='课程预约表';
 
 -- ---------------------------------------------------------------------
@@ -267,6 +269,8 @@ CREATE TABLE IF NOT EXISTS ai_conversation_session (
   user_id     BIGINT       NOT NULL COMMENT '用户ID',
   session_name VARCHAR(100) DEFAULT NULL COMMENT '会话名称',
   type        VARCHAR(20)  DEFAULT 'CHAT' COMMENT '会话类型:CHAT普通对话/ASSISTANT智能客服',
+  summary     TEXT         DEFAULT NULL COMMENT '早期对话压缩摘要(滚动摘要)',
+  summarized_msg_id BIGINT DEFAULT 0 COMMENT '已压缩到的消息ID',
   create_time DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   update_time DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   deleted     TINYINT      DEFAULT 0 COMMENT '逻辑删除',
@@ -332,6 +336,7 @@ CREATE TABLE IF NOT EXISTS sys_config (
 INSERT INTO sys_config (config_key, config_value, description) VALUES
 ('ai_chat_system_prompt', '你是一位专业的足球青训顾问，请结合青少年球员的体能、身高、体型等数据，用易懂的语言提供训练与饮食建议。', 'AI对话系统提示词'),
 ('ai_assistant_system_prompt', '你是一位足球青训智能客服，你可以通过工具帮助用户查询课程套餐和可约时段、预约/取消课程、查询赛事并报名。请先通过工具获取真实数据再回答，预约/取消/报名前必须与用户确认后再执行。', 'AI智能客服系统提示词'),
+('ai_summary_prompt', '你是对话摘要助手。请将输入的对话内容（可能包含一份旧摘要和新增对话）总结成300字以内的纯文本摘要：保留关键事实、用户偏好和未解决的问题，丢弃寒暄和重复内容。直接输出摘要文本，不要使用markdown格式，不要加任何前缀或解释。', 'AI对话上下文压缩提示词'),
 ('ai_assessment_prompt', '你是一位专业足球青训教练，根据问卷答案对学员进行百分制评分并给出针对性建议。', 'AI评测提示词'),
 ('ai_guidance_training_prompt', '你是足球青训教练，根据学员体能数据和异常指标给出具体训练建议。', 'AI训练指导提示词'),
 ('ai_guidance_diet_prompt', '你是青少年运动营养师，根据学员体能数据和异常指标给出饮食建议。', 'AI饮食指导提示词'),

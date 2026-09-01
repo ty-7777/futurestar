@@ -10,6 +10,14 @@
         AND deleted = 0
         ORDER BY id DESC LIMIT 20
     </select>
+    <!-- 压缩边界之后的全部消息：待压缩区被压缩阈值20封顶，加窗口20条，LIMIT 40足够 -->
+    <select id="loadAfter" resultType="com.situ.futurestar.core.entity.AiConversationMessage">
+        SELECT * FROM ai_conversation_message
+        WHERE session_id = #{sessionId}
+        AND deleted = 0
+        AND id &gt; #{boundaryId}
+        ORDER BY id DESC LIMIT 40
+    </select>
     <insert id="insert">
         INSERT INTO ai_conversation_message
         (session_id, user_id, role, message)
@@ -20,6 +28,15 @@
         FROM ai_conversation_message
         WHERE session_id = #{sessionId}
         AND deleted = 0
+        ORDER BY id ASC
+    </select>
+    <select id="selectPendingSummary" resultType="com.situ.futurestar.core.entity.AiConversationMessage">
+        SELECT id, role, message
+        FROM ai_conversation_message
+        WHERE session_id = #{sessionId}
+        AND deleted = 0
+        AND id &gt; #{fromId}
+        AND id &lt;= #{toId}
         ORDER BY id ASC
     </select>
 </mapper>

@@ -9,6 +9,10 @@
         SELECT * FROM refresh_token
         WHERE  token = #{refreshToken} AND expire_time &gt; NOW()
     </select>
+    <delete id="deleteByToken">
+        DELETE FROM refresh_token
+        WHERE token = #{refreshToken}
+    </delete>
     <delete id="deleteByUserId">
         DELETE FROM refresh_token
         WHERE user_id = #{userId}

@@ -33,7 +33,7 @@ public class JwtUtil {
                 .claim("phone",phone)
                 .claim("type","access")
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis()+accessExpire*1000))//过期时间两小时
+                .expiration(new Date(System.currentTimeMillis()+accessExpire*1000))//过期时间半小时
                 .signWith(getKey())
                 .compact();
     }

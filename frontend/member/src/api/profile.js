@@ -13,3 +13,8 @@ export function updateProfile(data) {
 export function changePassword(data) {
   return request.put('/member/profile/password', data)
 }
+
+// 获取头像上传的OSS签名直传策略
+export function getOssPolicy() {
+  return request.get('/member/profile/oss-policy')
+}
